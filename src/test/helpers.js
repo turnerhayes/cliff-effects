@@ -1,12 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-export const snippets = new Proxy({}, {
-  get() {
-    return 'Some translated text.';
-  },
-});
-
 const initialEntries = [
   {
     pathname: '/',

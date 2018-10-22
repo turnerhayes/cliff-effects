@@ -5,7 +5,9 @@
 */
 
 // LOGIC
-import { sum, pick, values } from 'lodash';
+import sum from 'lodash/sum';
+import pick from 'lodash/pick';
+import values from 'lodash/values';
 
 // DATA
 import {

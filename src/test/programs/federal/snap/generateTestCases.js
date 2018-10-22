@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
-import { cloneDeep, sample, times } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import sample from 'lodash/sample';
+import times from 'lodash/times';
 import { CLIENT_DEFAULTS } from '../../../../utils/CLIENT_DEFAULTS';
 import {
   UNEARNED_INCOME_SOURCES,

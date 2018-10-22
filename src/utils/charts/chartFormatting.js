@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import sumBy from 'lodash/sumBy';
 
 // Helper functions to format vlaues
 const toFancyMoneyStr = function (toFormat) {
@@ -23,7 +23,7 @@ const formatBenefitLinesTitle = function (tooltipItems, data) {
 
 const formatStackedTitle = function(tooltipItems, data) {
   const { index } = tooltipItems[ 0 ];
-  return toFancyMoneyStr(_.sumBy(data.datasets, (dataset) => {
+  return toFancyMoneyStr(sumBy(data.datasets, (dataset) => {
     return dataset.data[ index ];
   }));
 };

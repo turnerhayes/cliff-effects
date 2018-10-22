@@ -7,7 +7,8 @@ import {
   List,
   Modal,
 } from 'semantic-ui-react';
-import _ from 'lodash';
+import has from 'lodash/has';
+import findIndex from 'lodash/findIndex';
 import { getKeyPathsArray, getKeyPathStrings } from '../../utils/objectKeyPaths';
 
 // DATA
@@ -113,7 +114,7 @@ class LocalizationReport extends Component {
       // Loop through all model (EN) key paths
       let requiredKeyPathResults = modelKeyPaths.map((keyPath) => {
         let keyPathAsStr = keyPath.join('.');
-        let keyExistsInLoc = _.has(localizations[ compareLocKey ], keyPath);
+        let keyExistsInLoc = has(localizations[ compareLocKey ], keyPath);
 
         return {
           keyPath: keyPathAsStr,
@@ -149,7 +150,7 @@ class LocalizationReport extends Component {
         // If this keyPath has a version number, remove it so we can compare against the model key 
         // paths which have had their versions removed
         let keyPathAsStrNoVer = keyPathAsStr.split('_v')[ 0 ];
-        let keyExistsInLoc = _.findIndex(modelKeyPathStringsNoVer, (modelKeyPath) => {
+        let keyExistsInLoc = findIndex(modelKeyPathStringsNoVer, (modelKeyPath) => {
           return modelKeyPath === keyPathAsStrNoVer ? true : false;
         }) === -1 ? false : true ;
         

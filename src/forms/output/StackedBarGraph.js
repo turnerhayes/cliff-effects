@@ -14,7 +14,7 @@ import { applyAndPushBenefits } from '../../programs/applyAndPushBenefits';
 import { PROGRAM_CHART_VALUES } from '../../utils/charts/PROGRAM_CHART_VALUES';
 
 // OBJECT MANIPULATION
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 
 /** Visual representation of the table

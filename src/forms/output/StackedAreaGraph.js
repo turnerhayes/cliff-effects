@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
+import range from 'lodash/range';
 import { Line } from 'react-chartjs-2';
 
 // CUSTOM ELEMENTS
@@ -56,7 +56,7 @@ class StackedAreaGraph extends Component {
         xMax          = Math.ceil(max / 100) * 100,
         xMin          = Math.ceil(limits.min * multiplier / 100) * 100,
         interval      = Math.ceil(((xMax - xMin) / 100) / 10) * 10,
-        xRange        = _.range(xMin, xMax + interval, interval),
+        xRange        = range(xMin, xMax + interval, interval),
         extraProps    = { income: { fill: 'origin' }},
         datasets     = getChartData(xRange, multiplier, client, withIncome, extraProps);
 

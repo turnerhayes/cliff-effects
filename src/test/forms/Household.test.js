@@ -1,15 +1,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { HouseholdStep } from '../../forms/Household';
+import HouseholdStep from '../../forms/Household';
 
 import { CLIENT_DEFAULTS } from '../../utils/CLIENT_DEFAULTS';
 
-// LOCALIZATION
-import { getTextForLanguage } from '../../utils/getTextForLanguage';
-
-
-var snippets = getTextForLanguage(`en`);
 test('Household step component renders as snapshot correctly', () => {
   const navData = {
           left:   { text: 'Previous', onClick: jest.fn() },
@@ -19,8 +14,7 @@ test('Household step component renders as snapshot correctly', () => {
         updateClientValue     = jest.fn(),
         saveForm         = jest.fn(),
         askToResetClient = jest.fn(),
-        openFeedback     = jest.fn(),
-        formSnippets     = snippets.visitPage.household;
+        openFeedback     = jest.fn();
 
   const wrapper = shallow(
     <HouseholdStep
@@ -30,8 +24,7 @@ test('Household step component renders as snapshot correctly', () => {
       updateClientValue      = { updateClientValue }
       saveForm          = { saveForm }
       askToResetClient  = { askToResetClient }
-      openFeedback      = { openFeedback }
-      snippets          = { formSnippets } />
+      openFeedback      = { openFeedback } />
   );
 
   expect(wrapper).toMatchSnapshot();

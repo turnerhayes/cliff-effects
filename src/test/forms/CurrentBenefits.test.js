@@ -1,15 +1,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { CurrentBenefitsStep } from '../../forms/CurrentBenefits';
+import CurrentBenefitsStep from '../../forms/CurrentBenefits';
 
 import { CLIENT_DEFAULTS } from '../../utils/CLIENT_DEFAULTS';
 
-// LOCALIZATION
-import { getTextForLanguage } from '../../utils/getTextForLanguage';
 
-
-var snippets = getTextForLanguage(`en`);
 test('Benefits step component renders as snapshot correctly', () => {
   const navData = {
           left:   null,
@@ -19,8 +15,7 @@ test('Benefits step component renders as snapshot correctly', () => {
         updateClientValue     = jest.fn(),
         saveForm         = jest.fn(),
         askToResetClient = jest.fn(),
-        openFeedback     = jest.fn(),
-        formSnippets     = snippets.visitPage.currentBenefits;
+        openFeedback     = jest.fn();
 
   const wrapper = shallow(
     <CurrentBenefitsStep
@@ -30,8 +25,7 @@ test('Benefits step component renders as snapshot correctly', () => {
       updateClientValue      = { updateClientValue }
       saveForm          = { saveForm }
       askToResetClient  = { askToResetClient }
-      openFeedback      = { openFeedback }
-      snippets          = { formSnippets } />
+      openFeedback      = { openFeedback } />
   );
 
   expect(wrapper).toMatchSnapshot();

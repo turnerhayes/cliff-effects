@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
+import range from 'lodash/range';
 import { Line } from 'react-chartjs-2';
 import { Message } from 'semantic-ui-react';
 
@@ -47,7 +47,7 @@ class BenefitsLineGraph extends Component {
     var max       = Math.ceil((limits.max * multiplier) / 100) * 100,
         interval  = Math.ceil((max / 100) / 10) * 10;
 
-    var xRange      = _.range(limits.min, max, interval),  // x-axis/income numbers
+    var xRange      = range(limits.min, max, interval),  // x-axis/income numbers
         extraProps  = { snap: { fill: false }, section8: { fill: false }},
         datasets    = getChartData(xRange, multiplier, client, activePrograms, extraProps);
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { PROGRAM_CHART_VALUES } from '../../utils/charts/PROGRAM_CHART_VALUES';
 
 // LOGIC
@@ -43,7 +43,7 @@ const getChartData = function (incomes, multiplier, client, activeBenefitsInOrde
 
   var benefitDatasets = [],
       allData         = {},  // each active benefit will have data in here
-      clone           = _.cloneDeep(client),
+      clone           = cloneDeep(client),
       benefitCalcData = {
         activeBenefits: benefits,
         dataToAddTo:    allData,

@@ -1,40 +1,47 @@
 import React from 'react';
-import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
 import { cloneDeep, set } from 'lodash';
+import { intlShape } from 'react-intl';
 
-import { BenefitsTable } from '../../../forms/output/BenefitsTable';
-import { snippets } from '../../helpers';
+import BenefitsTable from '../../../forms/output/BenefitsTable';
 import { CLIENT_DEFAULTS } from '../../../utils/CLIENT_DEFAULTS';
+import { intl } from '../../utils/test-utils';
 
-const buildSnapshot = (client) => {
-  const rendered = renderer.create(
-    <BenefitsTable 
-      client={ client } 
-      snippets={ snippets } />
+const buildWrapper = (client) => {
+  const wrapper = mount(
+    (
+      <BenefitsTable 
+        client={ client } />
+    ),
+    {
+      context: { intl },
+
+      childContextTypes: { intl: intlShape },
+    }
   );
 
-  return rendered.toJSON();
+  return wrapper;
 };
 
 test('Benefits table renders correctly', () => {
   const client = cloneDeep(CLIENT_DEFAULTS);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'current.hasSnap', true);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'current.earned', 100);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'future.earned', 200);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'current.earned', 300);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'current.hasSection8');
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 
   set(client, 'future.earned', 400);
-  expect(buildSnapshot(client)).toMatchSnapshot();
+  expect(buildWrapper(client)).toMatchSnapshot();
 });

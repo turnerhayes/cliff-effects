@@ -2,7 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { defaultsDeep } from 'lodash';
 
-import { ExpensesOther } from '../../forms/ExpensesOther';
+import ExpensesOther from '../../forms/ExpensesOther';
 import { CLIENT_DEFAULTS } from '../../utils/CLIENT_DEFAULTS';
 
 const GREATER_THAN_ZERO = 1;

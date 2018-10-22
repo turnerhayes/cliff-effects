@@ -1,7 +1,7 @@
 import React from 'react';
 
 // PROJECT COMPONENTS
-import { ControlledRadioYesNo } from './inputs';
+import { ControlledRadioYesNo } from './Inputs';
 import { ContentH1 } from '../components/headings';
 import { Surrounder } from '../components/Surrounder';
 
