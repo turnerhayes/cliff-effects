@@ -25,7 +25,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -41,7 +43,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -57,7 +61,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -73,7 +79,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -93,30 +101,30 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -139,7 +147,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -152,9 +162,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -167,9 +177,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -182,11 +192,9 @@ exports[`Benefits table renders correctly 1`] = `
             }
           }
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -219,7 +227,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -235,7 +245,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -251,7 +263,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -267,7 +281,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -287,30 +303,30 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -326,30 +342,30 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -372,7 +388,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -385,9 +403,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -400,9 +418,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -415,11 +433,9 @@ exports[`Benefits table renders correctly 2`] = `
             }
           }
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -452,7 +468,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -468,7 +486,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -484,7 +504,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -500,7 +522,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -520,30 +544,30 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -559,30 +583,30 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $-100 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -605,7 +629,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -618,9 +644,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
-          292
-          Some translated text.
+          <span>
+            $292 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -633,9 +659,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -648,11 +674,9 @@ exports[`Benefits table renders correctly 3`] = `
             }
           }
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -685,7 +709,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -701,7 +727,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -717,7 +745,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -733,7 +763,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -753,30 +785,30 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -792,30 +824,30 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          200
-          Some translated text.
+          <span>
+            $200 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          +
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -838,7 +870,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -851,9 +885,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
-          292
-          Some translated text.
+          <span>
+            $292 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -866,9 +900,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          Some translated text.
-          392
-          Some translated text.
+          <span>
+            $392 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -881,11 +915,9 @@ exports[`Benefits table renders correctly 4`] = `
             }
           }
         >
-          +
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -918,7 +950,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -934,7 +968,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -950,7 +986,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -966,7 +1004,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -986,30 +1026,30 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1025,30 +1065,30 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          300
-          Some translated text.
+          <span>
+            $300 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          200
-          Some translated text.
+          <span>
+            $200 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $-100 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1071,7 +1111,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1084,9 +1126,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
-          492
-          Some translated text.
+          <span>
+            $492 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1099,9 +1141,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          Some translated text.
-          392
-          Some translated text.
+          <span>
+            $392 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1114,11 +1156,9 @@ exports[`Benefits table renders correctly 5`] = `
             }
           }
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -1151,7 +1191,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -1167,7 +1209,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -1183,7 +1227,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -1199,7 +1245,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -1219,30 +1267,30 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          
-           
-          Some translated text.
-          0
-          Some translated text.
+          <span>
+            $0 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1258,30 +1306,30 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          300
-          Some translated text.
+          <span>
+            $300 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          200
-          Some translated text.
+          <span>
+            $200 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $-100 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1304,7 +1352,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1317,9 +1367,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
-          492
-          Some translated text.
+          <span>
+            $492 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1332,9 +1382,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          Some translated text.
-          392
-          Some translated text.
+          <span>
+            $392 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1347,11 +1397,9 @@ exports[`Benefits table renders correctly 6`] = `
             }
           }
         >
-          -
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
     </tbody>
@@ -1384,7 +1432,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Benefit
+          </span>
         </td>
         <td
           className="three wide"
@@ -1400,7 +1450,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Current Benefits
+          </span>
         </td>
         <td
           className="three wide"
@@ -1416,7 +1468,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            New Estimate
+          </span>
         </td>
         <td
           className="three wide"
@@ -1432,7 +1486,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Difference
+          </span>
         </td>
       </tr>
     </thead>
@@ -1452,30 +1508,30 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            SNAP
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          192
-          Some translated text.
+          <span>
+            $192 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          187
-          Some translated text.
+          <span>
+            $187 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          -
-           
-          Some translated text.
-          5
-          Some translated text.
+          <span>
+            -$5 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1491,30 +1547,30 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Income
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          300
-          Some translated text.
+          <span>
+            $300 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          Some translated text.
-          400
-          Some translated text.
+          <span>
+            $400 / month
+          </span>
         </td>
         <td
           className="right aligned"
         >
-          +
-           
-          Some translated text.
-          100
-          Some translated text.
+          <span>
+            $100 / month
+          </span>
         </td>
       </tr>
       <tr
@@ -1537,7 +1593,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
+          <span>
+            Net Total
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1550,9 +1608,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
-          492
-          Some translated text.
+          <span>
+            $492 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1565,9 +1623,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          Some translated text.
-          587
-          Some translated text.
+          <span>
+            $587 / month
+          </span>
         </td>
         <td
           className="right aligned three wide"
@@ -1580,11 +1638,9 @@ exports[`Benefits table renders correctly 7`] = `
             }
           }
         >
-          +
-           
-          Some translated text.
-          95
-          Some translated text.
+          <span>
+            $95 / month
+          </span>
         </td>
       </tr>
     </tbody>

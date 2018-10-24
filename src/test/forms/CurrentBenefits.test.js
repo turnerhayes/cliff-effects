@@ -4,6 +4,7 @@ import { shallow } from 'enzyme';
 import CurrentBenefitsStep from '../../forms/CurrentBenefits';
 
 import { CLIENT_DEFAULTS } from '../../utils/CLIENT_DEFAULTS';
+import { wrapWithIntlProvider } from '../utils/test-utils';
 
 
 test('Benefits step component renders as snapshot correctly', () => {
@@ -18,15 +19,17 @@ test('Benefits step component renders as snapshot correctly', () => {
         openFeedback     = jest.fn();
 
   const wrapper = shallow(
-    <CurrentBenefitsStep
-      currentStep       = { 1 }
-      client            = { CLIENT_DEFAULTS }
-      navData           = { navData }
-      updateClientValue      = { updateClientValue }
-      saveForm          = { saveForm }
-      askToResetClient  = { askToResetClient }
-      openFeedback      = { openFeedback } />
+    wrapWithIntlProvider(
+      <CurrentBenefitsStep
+        currentStep       = { 1 }
+        client            = { CLIENT_DEFAULTS }
+        navData           = { navData }
+        updateClientValue = { updateClientValue }
+        saveForm          = { saveForm }
+        askToResetClient  = { askToResetClient }
+        openFeedback      = { openFeedback } />
+    )
   );
 
-  expect(wrapper).toMatchSnapshot();
+  expect(wrapper.find(CurrentBenefitsStep)).toMatchSnapshot();
 });

@@ -17,7 +17,14 @@ exports[`<BetaWarning> matches snapshot 1`] = `
         minWidth={992}
       >
         <strong>
-          This tool is a prototype and should not be used to make financial decisions.
+          <FormattedMessage
+            id="betaWarning.longText"
+            values={Object {}}
+          >
+            <span>
+              This tool is a prototype and should not be used to make financial decisions.
+            </span>
+          </FormattedMessage>
         </strong>
       </Responsive>
     </div>

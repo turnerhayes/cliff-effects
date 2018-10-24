@@ -1,0 +1,31 @@
+export default {
+  'footer.header.text': 'Cliff Effects Werkzeug',
+  'footer.cfbCredit': 'Mit ♥ von Code for Boston gemacht',
+
+  'homePage.appName': 'Cliff Effects Werkzeug',
+  'homePage.prototypeNote': 'Ein Prototyp für Beratungshilfe*',
+  'homePage.cautionaryNote': '*Dieses Werkzeug ist ein Prototyp. Bitte diesen Prototyp nicht benutzen, Ihre Entsheidungen fest zu machen.',
+  'homePage.toFirstInputPage': 'Beginnen',
+  'homePage.toAboutPage': 'Mehr lernen',
+
+  'aboutPage.header':                       'Über dieses Cliff Effects Werkzeug',
+  'aboutPage.whatFor.header':               'Wozu benutzt man dieses Werkzeug?',
+  'aboutPage.whatFor.importantNote.header': 'Wichtige Anmerkung: ',
+  'aboutPage.whatFor.importantNote.text':   `Diese Anwendung ist ein Minimum Viable Product (minimal überlebensfähiges Produkt). Sie sollte nicht als das einzige Werkzeug benutzt werden, um die SNAP- oder Section-8- (oder irgendein anderes Sozialhilfeprogramm-) finanzielle Situation eines Klienten zu verstehen.`,
+  'aboutPage.whatFor.text':                 `Dieses Werkzeug kann zeigen helfen, wie eine Einkommensveränderung sich auf die Sozialhilfe von SNAP und Section-8-Wohnungsgutschein auswirkt. Es wurde für die Sozialarbeiter an dem {projectHopeLink} gedacht, um ihnen zu helfen, die Veränderungen von den Klientenunterstützungen vorherzusehen.`,
+  'aboutPage.why.header':                   'Warum ist dieses Werkzeug wichtig?',
+  'aboutPage.why.paragraph1':               `Ein Cliff Effect sich ereignet, als eine kleine Veränderung von der Situation eines Haushalts (z.B. eine oberflächliche Lohnerhöhung) den Wert der Unterstützung in einer unangemessenen Weise senkt. Die Familie arbeitet, um ihre Einkommen sich zu verbessern, aber am Ende bekommt sie einen Nettoverlust, der sie eigentlich in eine schwerere Situation stellt. Diese Cliff Effects hindern viele Familien daran, das Bekommen von Sozialhilfe eigentlich zu enden.`,
+  'aboutPage.why.paragraph2':               `Die Cliff Effects sind schwer vorherzusehen. Die Interaktionen zwischen dem Einkommen, der Nummer von Personnen im Haushalt, vielen verschiedenen anderen Krieterien, und den Auswirkungen der Programmen selbst haben Auswirkungen aufeinander in unerwarteten Weisen. Wir suchen Methoden, um dieses Problem sich mit der Komplexität zu befassen, und die Familien ihre Situationen besser zu verstehen und vorherzusehen.`,
+  'aboutPage.videoLink':                    'Ein zweiminutenlanges Video über Cliff Effects',
+  'aboutPage.quantitativeLink':             'Manche Quantitative Szenarios, die Cliff Effects demonstrieren',
+  'aboutPage.benefitsLink':                 'Eine Aufgliederung von verschiedenen Sozialhilfeprogrammen im Bundesstaat Massachusetts',
+  'aboutPage.howToUse.header':              'Wie benutze ich dieses Werkzeug?',
+  'aboutPage.howToUse.text':                `Gehen Sie Schritt für Schritt, Informationen über eines Klienten gegenwärtigen Unterstützungen, Haushalt, Einkommen, und andere wichtige Information in das Formular auszufüllen. Diese Informationen werden benutzt werden, um die umgefähre Unterstützung vom Klienten vorherzusehen. Als Sie zum Ende kommen, wechseln Sie den Betrag vom 'Einkommen in Zukunft', um die daraus resultierende Veränderung des Unterstützungsbetrag zu sehen. Zu dieser Zeit können Sie Auswirkungen für die Programmen SNAP und Section 8 Housing Voucher sehen. Bitte bemerken Sie, daß die Vorhersagen sich vielleicht nicht direkt zu dem gegenwärtigen Unterstützungsbetrag eines Klienten passen. Das Ziel der Anwendung ist der Betrag von dem Unterstützungswechsel, das sich ereignet, als es Einkommenwechsel gibt.`,
+  'aboutPage.whoMadeThis.header':           'Wer entwickelt diese Anwendung?',
+
+  'visitPage.currentBenefits.title':            'Current Benefits',
+  'visitPage.currentBenefits.hasSection8Label': 'Haben Sie Section 8 Housing?',
+  'visitPage.currentBenefits.hasSection8Hint':  'Section 8 gibt Hilfe für die Miete',
+  'visitPage.currentBenefits.hasSNAPLabel':     'Haben Sie SNAP?',
+  'visitPage.currentBenefits.hasSNAPHint':      'SNAP gibt Hilfe für das Essenkaufen',
+};

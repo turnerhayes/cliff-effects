@@ -1,4 +1,5 @@
 import React from 'react';
+import { localeDefinesMessage } from '../../localization/messages';
 
 let isDev = false;
 
@@ -20,7 +21,7 @@ const TranslationContainer = ({ children }) => {
   );
 };
 
-// @todo: remove when using Redux 
+// @todo: remove if using Redux 
 const setIsDev = (value) => {
   isDev = !!value;
 };

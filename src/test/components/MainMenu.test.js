@@ -3,11 +3,12 @@ import { mount } from 'enzyme';
 
 import { MainMenu } from '../../components/MainMenu';
 import { withRouter } from '../helpers';
+import { wrapWithIntlProvider } from '../utils/test-utils';
 
 describe('<MainMenu>', () => {
   it('renders', () => {
     expect(() => {
-      return mount(withRouter(<MainMenu />));
+      return mount(wrapWithIntlProvider(withRouter(<MainMenu />)));
     }).not.toThrow();
   });
 });

@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Footer> matches snapshot 1`] = `
-<Footer
-  snippets={null}
->
+<Footer>
   <Segment
     className="footer_segment"
     color="teal"
@@ -40,11 +38,25 @@ exports[`<Footer> matches snapshot 1`] = `
                     <h4
                       className="ui inverted header"
                     >
-                      Some translated text.
+                      <FormattedMessage
+                        id="footer.header.text"
+                        values={Object {}}
+                      >
+                        <span>
+                          Cliff Effects Tool
+                        </span>
+                      </FormattedMessage>
                     </h4>
                   </Header>
                   <p>
-                    Some translated text.
+                    <FormattedMessage
+                      id="footer.cfbCredit"
+                      values={Object {}}
+                    >
+                      <span>
+                        Made with ♥ by Code for Boston
+                      </span>
+                    </FormattedMessage>
                   </p>
                 </div>
               </GridColumn>

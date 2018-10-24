@@ -12,7 +12,7 @@ import vi from 'react-intl/locale-data/vi';
 import zh from 'react-intl/locale-data/zh';
 
 import { Helmet } from 'react-helmet';
-import * as messages from './localization/messages';
+import { getMessages } from './localization/messages';
 
 import { Confirmer } from './utils/getUserConfirmation';
 
@@ -219,7 +219,7 @@ class App extends Component {
     return (
       <IntlProvider
         locale={ this.state.langCode }
-        messages={ messages[ this.state.langCode ] }
+        messages={ getMessages({ locale: this.state.langCode }) }
         textComponent={ TranslationContainer }>
         <div
           id = { `App` }

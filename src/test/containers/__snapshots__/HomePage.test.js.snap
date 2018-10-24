@@ -57,10 +57,24 @@ exports[`<HomePage> matches snapshot 1`] = `
               className="headings"
             >
               <h1>
-                Cliff Effects Tool
+                <FormattedMessage
+                  id="homePage.appName"
+                  values={Object {}}
+                >
+                  <span>
+                    Cliff Effects Tool
+                  </span>
+                </FormattedMessage>
               </h1>
               <h2>
-                GUIDANCE PROTOTYPE*
+                <FormattedMessage
+                  id="homePage.prototypeNote"
+                  values={Object {}}
+                >
+                  <span>
+                    GUIDANCE PROTOTYPE*
+                  </span>
+                </FormattedMessage>
               </h2>
             </div>
             <div
@@ -76,7 +90,14 @@ exports[`<HomePage> matches snapshot 1`] = `
                   href="/visit/54321/1"
                   onClick={[Function]}
                 >
-                  Get Started
+                  <FormattedMessage
+                    id="homePage.toFirstInputPage"
+                    values={Object {}}
+                  >
+                    <span>
+                      Get Started
+                    </span>
+                  </FormattedMessage>
                 </a>
               </Link>
               <Link
@@ -89,14 +110,28 @@ exports[`<HomePage> matches snapshot 1`] = `
                   href="/about"
                   onClick={[Function]}
                 >
-                  Learn More
+                  <FormattedMessage
+                    id="homePage.toAboutPage"
+                    values={Object {}}
+                  >
+                    <span>
+                      Learn More
+                    </span>
+                  </FormattedMessage>
                 </a>
               </Link>
             </div>
             <p
               className="home-disclaimer"
             >
-              *This is a prototype and should not be used to make financial decisions.
+              <FormattedMessage
+                id="homePage.cautionaryNote"
+                values={Object {}}
+              >
+                <span>
+                  *This is a prototype and should not be used to make financial decisions
+                </span>
+              </FormattedMessage>
             </p>
           </div>
         </div>

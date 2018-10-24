@@ -1,7 +1,22 @@
+import React from 'react';
 import { IntlProvider } from 'react-intl';
 
-const intlProvider = new IntlProvider({ locale: 'en' }, {});
+import enMessages from '../../localization/messages/en';
 
-const { intl } = intlProvider.getChildContext();
+const intlProviderProps = {
+  locale:   'en',
+  messages: enMessages,
+};
 
-export { intl };
+export const wrapWithIntlProvider = (component) => {
+  return (
+    <IntlProvider
+      { ...intlProviderProps }>
+      {component}
+    </IntlProvider>
+  );
+};
+
+const intlProvider = new IntlProvider(intlProviderProps, {});
+
+export const { intl } = intlProvider.getChildContext();

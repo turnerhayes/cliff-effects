@@ -140,7 +140,7 @@ const AboutContent = function () {
         <FormattedMessage
           { ...messages.whoMadeThis.paragraph3 }
           values={{
-            volunteerNamesButLast: contributors.slice(0, -1),
+            volunteerNamesButLast: contributors.slice(0, -1).join(', '),
             lastVolunteerName:     contributors[ contributors.length - 1 ],
           }} />
       </p>

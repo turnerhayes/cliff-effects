@@ -3,12 +3,10 @@
 exports[`Household step component renders as snapshot correctly 1`] = `
 <FormPartsContainer
   clarifier={
-    <span
-      className="snippet"
-      lang="en"
-    >
-      Information about the members of your household.
-    </span>
+    <FormattedMessage
+      id="visitPage.household.clarifier"
+      values={Object {}}
+    />
   }
   formClass="household"
   navData={
@@ -25,12 +23,10 @@ exports[`Household step component renders as snapshot correctly 1`] = `
     }
   }
   title={
-    <span
-      className="snippet"
-      lang="en"
-    >
-      Household
-    </span>
+    <FormattedMessage
+      id="visitPage.household.title"
+      values={Object {}}
+    />
   }
 >
   <HouseholdContent
@@ -91,77 +87,6 @@ exports[`Household step component renders as snapshot correctly 1`] = `
         "unemployment": 0,
         "wantsToSeeOtherExpenses": false,
         "workersComp": 0,
-      }
-    }
-    snippets={
-      Object {
-        "i_addMember": <span
-          className="snippet"
-          lang="en"
-      >
-          Add a member
-      </span>,
-        "i_age": <span
-          className="snippet"
-          lang="en"
-      >
-          Age
-      </span>,
-        "i_childOther": <span
-          className="snippet"
-          lang="en"
-      >
-          Child/Other Household Member
-      </span>,
-        "i_clarifier": <span
-          className="snippet"
-          lang="en"
-      >
-          Information about the members of your household.
-      </span>,
-        "i_disabled": <span
-          className="snippet"
-          lang="en"
-      >
-          Disabled
-      </span>,
-        "i_headOfHousehold": <span
-          className="snippet"
-          lang="en"
-      >
-          Head of Household
-      </span>,
-        "i_next": <span
-          className="snippet"
-          lang="en"
-      >
-          Next
-      </span>,
-        "i_previous": <span
-          className="snippet"
-          lang="en"
-      >
-          Previous
-      </span>,
-        "i_role": <span
-          className="snippet"
-          lang="en"
-      >
-          Role
-      </span>,
-        "i_spouse": <span
-          className="snippet"
-          lang="en"
-      >
-          Spouse of Head of Household
-      </span>,
-        "i_title": <span
-          className="snippet"
-          lang="en"
-      >
-          Household
-      </span>,
-        "langCode": "en",
       }
     }
     time="current"
