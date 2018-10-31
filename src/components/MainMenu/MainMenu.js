@@ -1,5 +1,8 @@
 import React from 'react';
-import { Menu } from 'semantic-ui-react';
+import {
+  // Button,
+  Menu,
+} from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import GithubLink from '../Links/GithubLink';
@@ -7,20 +10,24 @@ import GithubLink from '../Links/GithubLink';
 import messages from './messages';
 
 
-const MainMenu = function () {
+const MainMenu = function ({ snippets }) {
   return (
     <Menu
       inverted
       secondary
       size='large'>
-      
+
       <Menu.Item>
-        <Link to="/">
+        <Link
+          className="main-nav"
+          to="/">
           <FormattedMessage { ...messages.nav.home } />
         </Link>
       </Menu.Item>
       <Menu.Item>
-        <Link to="/about">
+        <Link
+          className="main-nav"
+          to="/about">
           <FormattedMessage { ...messages.nav.about } />
         </Link>
       </Menu.Item>
@@ -37,4 +44,5 @@ const MainMenu = function () {
 };  // End MainMenu(<>)
 
 
-export default MainMenu;
+export { MainMenu };
+

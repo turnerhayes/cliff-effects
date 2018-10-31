@@ -26,8 +26,6 @@ import TranslationContainer, {
   setIsDev,
   setLangCode,
 } from './components/TranslationContainer';
-// sort of a component
-import { renderIfTrue } from './components/renderIfTrue';
 
 // Development HUD
 import { DevSwitch } from './containers/DevSwitch';
@@ -86,7 +84,7 @@ class App extends Component {
      *  @property {boolean} devProps.dev - whether dev HUD is turned on
      *  @property {boolean} devProps.english - whether to highlight English translations
      *  @property {boolean} devProps.nonEnglish - whether to highlight translations in the current language, if that language is not English
-     *  @property {boolean} termsAccepted - displays modal to accept terms before allowing user to fill out form
+     *  @property {boolean} distrustConfirmed - displays modal to accept terms before allowing user to fill out form
      */
     this.state = {
       langCode: `en`,
@@ -104,7 +102,7 @@ class App extends Component {
         warningOff: true,
         ...localDev,
       },
-      termsAccepted: false,
+      distrustConfirmed: false,
     };
 
     setIsDev(this.state.devProps.dev);
@@ -186,14 +184,14 @@ class App extends Component {
     return classes;
   };  // End propsToClasses()
 
-  /** Toggles termsAccepted flag in app state.  Passed to PredictionsWarning modal
+  /** Toggles distrustConfirmed flag in app state.  Passed to PredictionsWarning modal
    * which calls this in the onClose handler.  App is unavailable until terms 
    * are accepted unless warningOff is set to true in DevHud.
    * @method
    */
-  toggleAcceptTerms = () => {
-    let isAccepted = this.state.termsAccepted;
-    this.setState({ termsAccepted: !isAccepted });
+  toggleDistrustConfirmed = () => {
+    let userDistrusts = this.state.distrustConfirmed;
+    this.setState({ distrustConfirmed: !userDistrusts });
   };  // End acceptTerms()
 
   render () {
@@ -201,7 +199,7 @@ class App extends Component {
       langCode,
       devProps,
       clients,
-      termsAccepted,
+      distrustConfirmed,
     } = this.state;
 
     var { warningOff } = devProps;
@@ -213,7 +211,7 @@ class App extends Component {
           loadClient:  this.loadClient,
           setLanguage: this.setLanguage,
         },
-        funcs      = { toggleAcceptTerms: this.toggleAcceptTerms },
+        funcs      = { toggleDistrustConfirmed: this.toggleDistrustConfirmed },
         clientData = clients.loaded;
 
     return (
@@ -248,10 +246,22 @@ class App extends Component {
                     return (
                       <VisitPage
                         { ...props }
-                        termsAccepted = { termsAccepted || warningOff }
+                        termsAccepted = { distrustConfirmed || warningOff }
                         funcs         = { funcs }
                         confirmer     = { confirmer }
                         clientData    = { clientData } />);
+                  } } />
+
+                {/* For managing our development HUD */}
+                <Route
+                  path = { `/dev` }
+                  component={ (props) => { return (
+                    <DevSwitch
+                      { ...props }
+                      distrustConfirmed = { distrustConfirmed || warningOff }
+                      funcs             = { funcs }
+                      confirmer         = { confirmer }
+                      clientData        = { clientData } />);
                   } } />
 
                 {/* For managing our development HUD */}
@@ -264,18 +274,19 @@ class App extends Component {
                       devProps = { devProps } />
                   );} } />
               </Switch>
-
             </div>
           </HashRouter>
           <Footer />
 
-          { renderIfTrue(devProps.dev === true, (
+          { (devProps.dev === true) ? (
             <DevHud
               devProps = { devProps }
               funcs    = { devFuncs }
               data     = {{ default: clients.default }}
               state    = { this.state } />
-          ))}
+          ) : (
+            null
+          ) }
         </div>
       </IntlProvider>
     );

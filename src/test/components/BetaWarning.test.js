@@ -5,13 +5,13 @@ import BetaWarning from '../../components/BetaWarning';
 import { wrapWithIntlProvider } from '../utils/test-utils';
 
 describe('<BetaWarning>', () => {
-  it('matches snapshot', () => {
-    const wrapper = mount(
-      wrapWithIntlProvider(
-        <BetaWarning />
-      )
-    );
-
-    expect(wrapper.find(BetaWarning)).toMatchSnapshot();
+  it('renders', () => {
+    expect(() => {
+      mount(
+        wrapWithIntlProvider(
+          <BetaWarning />
+        )
+      );
+    }).not.toThrow();
   });
 });

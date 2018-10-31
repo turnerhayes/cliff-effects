@@ -18,6 +18,8 @@ export default {
   feedbackAsk: { id: 'visitPage.predictions.summary.feedbackAsk' },
   
   feedbackLinkText: { id: 'visitPage.predictions.feedbackLinkText' },
+  
+  printButtonText: { id: 'visitPage.predictions.printButtonText' },
 
   details: {
     header: { id: 'visitPage.predictions.summary.details.header' },

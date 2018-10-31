@@ -314,6 +314,8 @@ const Summary = function ({ client, openFeedback }) {
   // ==================
   // Hmm, don't like having `<p>`s up here. Page structure not clear in return value.
 
+  // `<span>`s to avoid repeating React keys
+
   // "What could happen?"
   const detailsNow = (
     <p>
@@ -360,6 +362,8 @@ const Summary = function ({ client, openFeedback }) {
   }  // ends for each benefit
 
   // Ask for feedback
+  // Stays put when printing. A take-home hint
+  // that the tool is still a prototype
   const feedbackAsk = (
     <p>
       <FormattedMessage
@@ -429,6 +433,10 @@ const Summary = function ({ client, openFeedback }) {
     );
   }  // ends if there's a cliff end
 
+  const print = function () {
+    window.print();
+  };
+
   return (
     <div>
 
@@ -454,6 +462,16 @@ const Summary = function ({ client, openFeedback }) {
       </div>
       
       { endOfCliffContent }
+
+      <div className={ `print-row` } >
+        <Button
+          className = { `print` }
+          color     = { `teal` }
+          onClick   = { print }>
+          <FormattedMessage
+            { ...messages.printButtonText } />
+        </Button>
+      </div>
 
     </div>
   );

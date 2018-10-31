@@ -8,8 +8,6 @@ import {
 } from 'semantic-ui-react';
 import { FormattedMessage } from 'react-intl';
 
-// CUSTOM
-import { renderIfTrue } from '../../renderIfTrue';
 import messages from './messages';
 import FormattedMarkdownMessage from '../../FormattedMarkdownMessage/FormattedMarkdownMessage';
 
@@ -40,72 +38,70 @@ class AskPermission extends React.Component {
   };
 
   // Return an array to take advantage of `Modal` styling
-  render () {
-    return ([
-      <Modal.Content key = "ask-permission-content">
-        <p>{ this.props.question }</p>
+  render () {return ([
+    <Modal.Content key = { `ask-permission-content` }>
+      <p>{ this.props.question }</p>
 
-        <Form.Field>
-          <Radio
-            name     = "data-ask"
-            value    = "withData"
-            label    = {
-              <label>
-                <FormattedMessage
-                  { ...messages.yes } />
-              </label>
-            }
-            checked  = { this.state.submitType === `withData` }
-            onChange = { this.setSubmitType } />
-        </Form.Field>
-        <Form.Field>
-          <Radio
-            name     = "data-ask"
-            value    = "withoutData"
-            label    = {
-              <label>
-                <FormattedMessage
-                  { ...messages.no } />
-              </label>
-            }
-            checked  = { this.state.submitType === `withoutData` }
-            onChange = { this.setSubmitType } />
-        </Form.Field>
-      </Modal.Content>,
-      <Modal.Actions key = "ask-permission-actions">
-        <Button
-          onClick  ={ this.close }
-          disabled ={ this.props.submitting }>
+      <Form.Field>
+        <Radio
+          name     = { `data-ask` }
+          value    = { `withData` }
+          label    = {
+            <label>
+              <FormattedMessage
+                { ...messages.yes } />
+            </label>
+          }
+          checked  = { this.state.submitType === `withData` }
+          onChange = { this.setSubmitType } />
+      </Form.Field>
+      <Form.Field>
+        <Radio
+          name     = { `data-ask` }
+          value    = { `withoutData` }
+          label    = {
+            <label>
+              <FormattedMessage
+                { ...messages.no } />
+            </label>
+          }
+          checked  = { this.state.submitType === `withoutData` }
+          onChange = { this.setSubmitType } />
+      </Form.Field>
+    </Modal.Content>,
+    <Modal.Actions key = { `ask-permission-actions` }>
+      <Button
+        onClick  ={ this.close }
+        disabled ={ this.props.submitting }>
+        <FormattedMessage
+          { ...messages.cancel } />
+      </Button>
+      <Button
+        onClick  = { this.submit }
+        loading  = { this.props.submitting }
+        disabled = { this.state.submitType === null }
+        color    ='teal'>
+        { (this.state.submitType === `withData`) ? (
           <FormattedMessage
-            { ...messages.cancel } />
-        </Button>
-        <Button
-          onClick  = { this.submit }
-          loading  = { this.props.submitting }
-          disabled = { this.state.submitType === null }
-          color    ='teal'>
-          {renderIfTrue(this.state.submitType === `withData`,
-            (
-              <FormattedMessage
-                { ...messages.sendWithMyInformation } />
-            )
-          )}
-          {renderIfTrue(this.state.submitType === `withoutData`,
-            (
-              <FormattedMessage
-                { ...messages.sendWithoutMyInformation } />
-            )
-          )}
-          {renderIfTrue(this.state.submitType === null,
-            (
-              <FormattedMessage
-                { ...messages.send } />
-            )
-          )}
-        </Button>
-      </Modal.Actions>,
-    ]);
-  }
+            { ...messages.sendWithMyInformation } />
+        ) : (
+          null
+        ) }
+        { (this.state.submitType === `withoutData`) ? (
+          <FormattedMessage
+            { ...messages.sendWithoutMyInformation } />
+        ) : (
+          null
+        ) }
+        {
+          (this.state.submitType === null) ? (
+            <FormattedMessage
+              { ...messages.send } />
+          ) : (null)
+        }
+      </Button>
+    </Modal.Actions>,
+  ]);}
 }
 
 

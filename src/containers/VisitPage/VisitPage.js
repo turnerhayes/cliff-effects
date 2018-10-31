@@ -18,22 +18,22 @@ import { Confirmer } from '../../utils/getUserConfirmation';
 import { CLIENT_DEFAULTS } from '../../utils/CLIENT_DEFAULTS';
 
 // Our Components
-// import AlertSidebar from '../../AlertSidebar'
-import BrowserLeaveListener from '../../components/prompts/BrowserLeaveListener';
-import ReactRouterLeaveListener from '../../components/prompts/ReactRouterLeaveListener';
-import ErrorListener from '../../components/prompts/ErrorListener';
-import FeedbackPrompt from '../../components/prompts/FeedbackPrompt';
-import FeedbackForm from '../../components/prompts/FeedbackForm/FeedbackForm';
-import FeedbackAnytime from '../../components/prompts/FeedbackAnytime';
-import ResetAnytime from '../../components/prompts/ResetAnytime';
-import CurrentIncomeStep from '../../forms/CurrentIncome';
-import CurrentExpensesStep from '../../forms/CurrentExpenses';
-import PredictionsStep from '../../forms/Predictions';
-import HouseholdStep from '../../forms/Household';
-import CurrentBenefitsStep from '../../forms/CurrentBenefits';
-import StepBar from '../../components/StepBar';
-import { BigButton } from '../../forms/inputs';
-import PredictionsWarning from '../../components/prompts/PredictionsWarning';
+// import AlertSidebar from '../AlertSidebar'
+import BrowserLeaveListener from '../components/prompts/BrowserLeaveListener';
+import ReactRouterLeaveListener from '../components/prompts/ReactRouterLeaveListener';
+import ErrorListener from '../components/prompts/ErrorListener';
+import FeedbackPrompt from '../components/prompts/FeedbackPrompt';
+import FeedbackForm from '../components/prompts/FeedbackForm';
+import { FeedbackAnytime } from '../components/prompts/FeedbackAnytime';
+import { CurrentIncomeStep } from '../forms/CurrentIncome';
+import { CurrentExpensesStep } from '../forms/CurrentExpenses';
+import { PredictionsStep } from '../forms/Predictions';
+import { HouseholdStep } from '../forms/Household';
+import { CurrentBenefitsStep } from '../forms/CurrentBenefits';
+import StepBar from '../components/StepBar';
+import { BigButton } from '../forms/inputs';
+import { ButtonReset } from '../forms/ButtonReset';
+import PredictionsWarning from '../components/prompts/PredictionsWarning';
 import messages from './messages';
 
 class VisitPage extends Component {
@@ -270,27 +270,23 @@ class VisitPage extends Component {
         FormSection  = step.form;
 
     return (
-      <div>
-        <FormSection
-          currentStep={ this.state.currentStep }
-          client={ this.state.client }
-          navData={ navData }
-          updateClientValue={ step.updateClientValue }
-          saveForm={ this.saveForm }
-          askToResetClient={ this.askToResetClient }
-          openFeedback={ this.openFeedback } />
-        <FeedbackAnytime openFeedback={ this.openFeedback } />
-        <ResetAnytime askToResetClient={ this.askToResetClient } />
-      </div>
+      <FormSection
+        currentStep={ this.state.currentStep }
+        client={ this.state.client }
+        navData={ navData }
+        updateClientValue={ step.updateClientValue }
+        saveForm={ this.saveForm }
+        askToResetClient={ this.askToResetClient }
+        openFeedback={ this.openFeedback } />
     );
   };  // End getCurrentStep()
 
   render() {
 
-    let prevContent        = null;
-    let nextContent        = null;
-    let stepIndex          = this.getCurrentStepIndex();
-    let termsAccepted      = this.props.termsAccepted;
+    var prevContent       = null,
+        nextContent       = null,
+        stepIndex         = this.getCurrentStepIndex(),
+        distrustConfirmed = this.props.distrustConfirmed;
 
     if (stepIndex !== 0) {
       prevContent = (
@@ -312,13 +308,11 @@ class VisitPage extends Component {
       );
     // Otherwise, set up to reset client
     } else {
-      // Can be reused for fixed button on the left
       nextContent  = (
-        <BigButton
-          onClick  = { this.askToResetClient } >
+        <ButtonReset onClick  = { this.askToResetClient } >
           <FormattedMessage
             { ...messages.newClient } />
-        </BigButton>
+        </ButtonReset>
       );
     }
 
@@ -371,32 +365,40 @@ class VisitPage extends Component {
         ) }
 
         {/* = SECTION = */}
-        {/* `padding` here duplicates previous `<Grid>` styleing */}
+        {/* `padding` here duplicates previous `<Grid>` styling */}
         <Container
           id = { `cliff-effects-tool` }
-          className='flex-item flex-column'
-          style={{ padding: '42px 0' }}>
+          className='flex-item flex-column'>
           <Responsive
-            minWidth='874.5'
-            style={{ padding: '14px 0' }}>
+            id = { `form-nav` }
+            minWidth='874.5'>
             <StepBar
               currentStepIndex={ this.state.currentStep }
               steps={ this.steps }
               goToStep={ this.goToStep } />
           </Responsive>
           <div
-            className="flex-item flex-column"
-            style={{ padding: '14px 0' }}>
+            className="flex-item flex-column current-step-component">
             { this.getCurrentStep(navData) }
           </div>
 
         </Container>
 
-        { 
-          termsAccepted === false ? (
+        <Container id={ `alwaysLeftButtons` }>
+          <ButtonReset
+            onClick   = { this.askToResetClient }
+            overrides = {{ id: `resetFixed`, size: `medium` }}>
+            <FormattedMessage
+              { ...messages.newClient } />
+          </ButtonReset>
+          <FeedbackAnytime openFeedback={ this.openFeedback } />
+        </Container>
+
+        {
+          distrustConfirmed === false ? (
             <PredictionsWarning
-              termsAccepted = { termsAccepted }
-              toggleAcceptTerms = { this.props.funcs.toggleAcceptTerms } />
+              distrustConfirmed       = { distrustConfirmed }
+              toggleDistrustConfirmed = { this.props.funcs.toggleDistrustConfirmed } />
           ) : (
             null
           )

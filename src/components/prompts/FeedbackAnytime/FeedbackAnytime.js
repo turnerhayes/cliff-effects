@@ -14,7 +14,6 @@ const FeedbackAnytime = function (props) {
         type='button'
         color='teal'
         size='medium'
-        className="fixed rotate"
         id="feedback_fixed">
         <FormattedMessage
           { ...messages.buttonText } />

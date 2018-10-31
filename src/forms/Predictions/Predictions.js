@@ -161,38 +161,45 @@ const PredictionsStep = function ({ updateClientValue, navData, client, openFeed
       }
       clarifier = { null }
       navData   = { navData }
-      formClass="predictions">
-      <IncomeForm
-        updateClientValue = { updateClientValue }
-        future            = { client.future }
-        time="future" />
-      <Divider className="ui section divider hidden" />
-      <Header
-        as        ="h3"
-        className ="ui Header align centered">
-        <FormattedMessage
-          { ...messages.chartsHeader } />
-      </Header>
-      <Message
-        className="prediction-message"
-        visible
-        warning>
-        <FormattedMessage
-          { ...messages.warningMessage }
-          values={{
-            feedbackButton: (
-              <Button
-                className="feedback-button"
-                size="small"
-                color="teal"
-                compact
-                onClick   = { openFeedback }>
-                <FormattedMessage
-                  { ...messages.feedbackLinkText } />
-              </Button>
-            ),
-          }} />
-      </Message>
+      formClass = { `predictions` }>
+      {/* `predictionsForm`: This whole div will be outside
+        the form in the future and then we'll be able to
+        access its style that way */}
+      <div id = { `predictionsForm` }>
+        <IncomeForm
+          updateClientValue = { updateClientValue }
+          future            = { client.future }
+          time              = { 'future' } />
+        <Divider className='ui section divider hidden' />
+      </div>
+      <div id={ `resultsIntro` }>
+        <Header
+          as        ='h3'
+          className ='ui Header align centered'>
+          <FormattedMessage
+            { ...messages.chartsHeader } />
+        </Header>
+        <Message
+          className = { `prediction-message` }
+          visible
+          warning>
+          <FormattedMessage
+            { ...messages.warningMessage }
+            values={{
+              feedbackButton: (
+                <Button
+                  className="feedback-button"
+                  size="small"
+                  color="teal"
+                  compact
+                  onClick   = { openFeedback }>
+                  <FormattedMessage
+                    { ...messages.feedbackLinkText } />
+                </Button>
+              ),
+            }} />
+        </Message>
+      </div>
       <TabbedVisualizations 
         client       = { client }
         openFeedback = { openFeedback } />

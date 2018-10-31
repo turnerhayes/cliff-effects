@@ -191,6 +191,7 @@ Examples of eligible disability assistance expenses:
   'visitPage.predictions.chartsHeader':              'With the new pay, how could your benefits change?',
   'visitPage.predictions.warningMessage':            `This tool is in testing and these numbers might not be right. If they're not, please {feedbackButton}`,
   'visitPage.predictions.feedbackLinkText':          'let us know',
+  'visitPage.predictions.printButtonText':           'Print',
   
   // Text Summary:
   'visitPage.predictions.summaryTitle':             `Summary`,
