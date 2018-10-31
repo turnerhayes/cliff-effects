@@ -1,12 +1,12 @@
 export default {
   'footer.header.text': 'Cliff Effects Werkzeug',
-  'footer.cfbCredit': 'Mit ♥ von Code for Boston gemacht',
+  'footer.cfbCredit':   'Mit ♥ von Code for Boston gemacht',
 
-  'homePage.appName': 'Cliff Effects Werkzeug',
-  'homePage.prototypeNote': 'Ein Prototyp für Beratungshilfe*',
-  'homePage.cautionaryNote': '*Dieses Werkzeug ist ein Prototyp. Bitte diesen Prototyp nicht benutzen, Ihre Entsheidungen fest zu machen.',
+  'homePage.appName':          'Cliff Effects Werkzeug',
+  'homePage.prototypeNote':    'Ein Prototyp für Beratungshilfe*',
+  'homePage.cautionaryNote':   '*Dieses Werkzeug ist ein Prototyp. Bitte diesen Prototyp nicht benutzen, Ihre Entsheidungen fest zu machen.',
   'homePage.toFirstInputPage': 'Beginnen',
-  'homePage.toAboutPage': 'Mehr lernen',
+  'homePage.toAboutPage':      'Mehr lernen',
 
   'aboutPage.header':                       'Über dieses Cliff Effects Werkzeug',
   'aboutPage.whatFor.header':               'Wozu benutzt man dieses Werkzeug?',
