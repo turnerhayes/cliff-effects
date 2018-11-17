@@ -33,6 +33,7 @@ import {
   Switch,
 } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import localforage from 'localforage';
 
 import { Confirmer } from './utils/getUserConfirmation';
 
@@ -42,19 +43,29 @@ import AboutPage from './containers/AboutPage';
 import VisitPage from './containers/VisitPage';
 import Footer from './components/Footer';
 import Header from './components/Header';
-// sort of a component
-import { renderIfTrue } from './components/renderIfTrue';
 
 // Development HUD
 import { DevSwitch } from './containers/DevSwitch';
 import { DevHud } from './components/dev/DevHud';
 
 // Object Manipulation
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import merge from 'lodash/merge';
 import { CLIENT_DEFAULTS } from './utils/CLIENT_DEFAULTS';
 
 // LOCALIZATION
 import { getTextForLanguage } from './utils/getTextForLanguage';
+
+
+const DEV_PROPS_STORAGE_KEY = 'cliffEffectsDevProps';
+
+const LOADED_CLIENT_STORAGE_KEY = 'cliffEffects_loadedClient';
+
+const CLIENT_LAST_LOADED_STORAGE_KEY = 'cliffEffects_clientLastLoaded';
+
+// Time-to-live for stored client data, in milliseconds
+const STORED_CLIENT_TTL = 1000 * 60; // 1 minute
+// const STORED_CLIENT_TTL = 1000 * 60 * 60 * 24; // 1 day
 
 /**
  * Main top-level component of the app. Contains the router that controls access
@@ -76,15 +87,7 @@ class App extends Component {
   constructor (props) {
     super(props);
 
-    var defaults = cloneDeep(CLIENT_DEFAULTS);
-
-    // Development variables are the only things stored
-    var localDev = localStorage.getItem(`cliffEffectsDevProps`);
-    if (typeof localDev !== `string`) {
-      localDev = {};
-    } else {
-      localDev = JSON.parse(localDev);
-    }
+    let defaults = cloneDeep(CLIENT_DEFAULTS);
 
     /**
      *  React state.
@@ -97,7 +100,7 @@ class App extends Component {
      *  @property {boolean} devProps.dev - whether dev HUD is turned on
      *  @property {boolean} devProps.english - whether to highlight English snippets
      *  @property {boolean} devProps.nonEnglish - whether to highlight snippets in the current language, if that language is not English
-     *  @property {boolean} termsAccepted - displays modal to accept terms before allowing user to fill out form
+     *  @property {boolean} distrustConfirmed - displays modal to accept terms before allowing user to fill out form
      */
     this.state = {
       langCode: `en`,
@@ -114,11 +117,94 @@ class App extends Component {
         english:    true,
         nonEnglish: true,
         warningOff: true,
-        ...localDev,
       },
-      termsAccepted: false,
+      distrustConfirmed: false,
     };
   };  // End constructor()
+
+  componentDidMount() {
+    Promise.all([
+      localforage.getItem(DEV_PROPS_STORAGE_KEY),
+      localforage.getItem(CLIENT_LAST_LOADED_STORAGE_KEY),
+      localforage.getItem(LOADED_CLIENT_STORAGE_KEY),
+    ]).then(
+      ([
+        localDev,
+        clientLastLoaded,
+        loadedClient,
+      ]) => {
+        if (localDev) {
+          this.setState((prevState) => {
+            const now = Date.now();
+
+            clientLastLoaded = clientLastLoaded || 0;
+
+            let state = merge(
+              {},
+              prevState,
+              { devProps: localDev }
+            );
+
+            if (now - clientLastLoaded >= STORED_CLIENT_TTL) {
+              localforage.removeItem(LOADED_CLIENT_STORAGE_KEY);
+              localforage.removeItem(CLIENT_LAST_LOADED_STORAGE_KEY);
+            }
+            else {
+              state.clients.loaded = loadedClient;
+            }
+
+            return state;
+          });
+        }
+      }
+    );
+
+    // Webpack should remove this whole conditional when not built for development environment
+    if (process.env.NODE_ENV === 'development') {
+      // Using this form of import to make sure this isn't made a dependency when not bundled
+      // in a non-development environment. In theory, tree shaking should avoid that, but I'm
+      // not 100% sure.
+      import('./dev/deepFreeze').then(
+        ({ deepFreeze }) => {
+          console.log(
+            `
+    %c========================= Cliff Effects Dev Utilities =========================
+    
+    - enableDev() - Enable the Dev HUD (without needing to go to /dev)
+    
+    - client      - The current value of the loaded client (a recursively frozen
+                    one, so that you can't change it, which could cause weirdness
+                    in the app)
+    
+    ===============================================================================
+            `,
+            'color: blue',
+          );
+          
+          Object.defineProperties(
+            window,
+            {
+              enableDev: {
+                enumerable:   true,
+                configurable: true,
+                value:        () => {
+                  this.setDev('dev', true);
+                },
+              },
+    
+              client: {
+                enumerable:   true,
+                configurable: true,
+                get:          () => {
+                  return deepFreeze(this.state.clients.loaded);
+                },
+              },
+            }
+          );
+        }
+      );
+    }
+  }
 
   /**
    * Set the human language of the app (i.e. the language in which the UI will
@@ -129,25 +215,23 @@ class App extends Component {
    * @param {string} inputProps.value - the [ISO 639-1 code]{@link https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes} for the newly selected language.
   */
   setLanguage = (evnt, inputProps) => {
-    var snippets = getTextForLanguage(inputProps.value);
+    let snippets = getTextForLanguage(inputProps.value);
     this.setState({ language: inputProps.value, snippets: snippets });
   };
 
   /** Set the value of a specified key in the app state's devProps.
-   * These keys should only be set to boolean values (@todo enforce only allowing boolean values?).
-   * Keys with a value of true are added as classes to the app's main element when it is rendered.
    * @method
-   * @param {string} key - The key whose value is to be changed in the app state's devProps
-   * @param {boolean} value - The value to be set for the given key in the app state's devProps
+   * @param {string[]|string} key - The key--or key path--whose value is to be changed in the app state's devProps
+   * @param {*} value - The value to be set for the given key in the app state's devProps
    */
   setDev = (key, value) => {
     this.setState((prevState) => {
 
-      var props = prevState.devProps;
+      let props = prevState.devProps;
       if (props[ key ] !== value) {
+        let newProps = { ...props, [ key ]: value };
 
-        var newProps = { ...props, [ key ]: value };
-        localStorage.setItem(`cliffEffectsDevProps`, JSON.stringify(newProps));
+        localforage.setItem(DEV_PROPS_STORAGE_KEY, newProps);
 
         return { devProps: newProps };
       }
@@ -169,6 +253,9 @@ class App extends Component {
             defaults = cloneDeep(clients.default),
             newData  = Object.assign(defaults, toLoad);
 
+      localforage.setItem(CLIENT_LAST_LOADED_STORAGE_KEY, Date.now());
+      localforage.setItem(LOADED_CLIENT_STORAGE_KEY, newData);
+
       return { clients: { ...clients, loaded: newData }};
     });
   };  // End loadClient()
@@ -182,7 +269,7 @@ class App extends Component {
    * of obj with values equal to true, separated by spaces.
    */
   propsToClasses (obj) {
-    var classes = ``;
+    let classes = ``;
     for (let key in obj) {
       if (obj[ key ] === true) {
         classes += ` ` + key;
@@ -191,35 +278,35 @@ class App extends Component {
     return classes;
   };  // End propsToClasses()
 
-  /** Toggles termsAccepted flag in app state.  Passed to PredictionsWarning modal
+  /** Toggles distrustConfirmed flag in app state.  Passed to PredictionsWarning modal
    * which calls this in the onClose handler.  App is unavailable until terms 
    * are accepted unless warningOff is set to true in DevHud.
    * @method
    */
-  toggleAcceptTerms = () => {
-    let isAccepted = this.state.termsAccepted;
-    this.setState({ termsAccepted: !isAccepted });
+  toggleDistrustConfirmed = () => {
+    let userDistrusts = this.state.distrustConfirmed;
+    this.setState({ distrustConfirmed: !userDistrusts });
   };  // End acceptTerms()
 
   render () {
-    var {
+    let {
       langCode,
       snippets,
       devProps,
       clients,
-      termsAccepted,
+      distrustConfirmed,
     } = this.state;
 
-    var { warningOff } = devProps;
+    let { warningOff } = devProps;
 
-    var confirmer = new Confirmer(),  // Makes sure user doesn't accidentally lose work
+    let confirmer = new Confirmer(),  // Makes sure user doesn't accidentally lose work
         classes   = this.propsToClasses(devProps),
         devFuncs  = {
           setDev:      this.setDev,
           loadClient:  this.loadClient,
           setLanguage: this.setLanguage,
         },
-        funcs      = { toggleAcceptTerms: this.toggleAcceptTerms },
+        funcs      = { toggleDistrustConfirmed: this.toggleDistrustConfirmed },
         clientData = clients.loaded;
 
     return (
@@ -260,16 +347,22 @@ class App extends Component {
                       snippets={{ ...snippets.aboutPage, langCode: snippets.langCode }} />);
                 } } />
               &lt;Route
-                path="/visit/:clientId/:visitId"
-                component={ (props) => {
+                path="/visit/:clientId/:visitId/:stepKey?"
+                component={ ({ match, history, ...props }) => {
+                  const { clientId, visitId, stepKey } = match.params;
+
                   return (
                     &lt;VisitPage
                       { ...props }
-                      termsAccepted = { termsAccepted || warningOff }
-                      funcs         = { funcs }
-                      confirmer     = { confirmer }
-                      snippets      = {{ ...snippets.visitPage, langCode: snippets.langCode }}
-                      clientData    = { clientData } />);
+                      history           = { history }
+                      clientId          = { clientId }
+                      visitId           = { visitId }
+                      stepKey           = { stepKey }
+                      distrustConfirmed = { distrustConfirmed || warningOff }
+                      funcs             = { funcs }
+                      confirmer         = { confirmer }
+                      snippets          = {{ ...snippets.visitPage, langCode: snippets.langCode }}
+                      clientData        = { clientData } />);
                 } } />
 
               {/* For managing our development HUD */}
@@ -287,13 +380,15 @@ class App extends Component {
         &lt;/HashRouter>
         &lt;Footer snippets={{ ...snippets.footer, langCode: snippets.langCode }} />
 
-        { renderIfTrue(devProps.dev === true, (
+        { (devProps.dev === true) ? (
           &lt;DevHud
             devProps = { devProps }
             funcs    = { devFuncs }
             data     = {{ default: clients.default }}
             state    = { this.state } />
-        ))}
+        ) : (
+          null
+        ) }
       &lt;/div>
     );
   };  // End render()
@@ -311,13 +406,13 @@ export default App;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_cashflow.html">utils/cashflow</a></li><li><a href="module-utils_convert-by-timescale.html">utils/convert-by-timescale</a></li><li><a href="module-utils_getGovData.html">utils/getGovData</a></li><li><a href="module-utils_getMembers.html">utils/getMembers</a></li><li><a href="module-utils_getSideEffects.html">utils/getSideEffects</a></li><li><a href="module-utils_getTextForLanguage.html">utils/getTextForLanguage</a></li><li><a href="module-utils_getTimeFrames.html">utils/getTimeFrames</a></li><li><a href="module-utils_interpolation.html">utils/interpolation</a></li><li><a href="module-utils_math.html">utils/math</a></li><li><a href="module-utils_objectKeyPaths.html">utils/objectKeyPaths</a></li><li><a href="module-utils_setNestedProperty.html">utils/setNestedProperty</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowContainer">CashFlowContainer</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#localizations">localizations</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_charts_chartFormatting.html">utils/charts/chartFormatting</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BenefitsLinesComp.html">BenefitsLinesComp</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#applySideEffects">applySideEffects</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CashFlowRow">CashFlowRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#convertForUpdate">convertForUpdate</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#deepFreeze">deepFreeze</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#empty">empty</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getBenefitTimeFrames">getBenefitTimeFrames</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getDependentCostsMonthly">getDependentCostsMonthly</a></li><li><a href="global.html#getEveryMember">getEveryMember</a></li><li><a href="global.html#getEveryMemberOfHousehold">getEveryMemberOfHousehold</a></li><li><a href="global.html#getExtraAmount">getExtraAmount</a></li><li><a href="global.html#getGrossUnearnedIncomeMonthly">getGrossUnearnedIncomeMonthly</a></li><li><a href="global.html#getKeyPathsArray">getKeyPathsArray</a></li><li><a href="global.html#getKeyPathStrings">getKeyPathStrings</a></li><li><a href="global.html#getLimitBySize">getLimitBySize</a></li><li><a href="global.html#getLocalizationData">getLocalizationData</a></li><li><a href="global.html#getMaxIntKey">getMaxIntKey</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSimpleGrossIncomeMonthly">getSimpleGrossIncomeMonthly</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#getTextForLanguage">getTextForLanguage</a></li><li><a href="global.html#getUnder13Expenses">getUnder13Expenses</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#interpolateSnippets">interpolateSnippets</a></li><li><a href="global.html#interpolateText">interpolateText</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#isDependent">isDependent</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#mergeCustomizer">mergeCustomizer</a></li><li><a href="global.html#moneyToWholeNum">moneyToWholeNum</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#Recursionisuntested.">Recursion is untested.</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#sum">sum</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#sumProps">sumProps</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#toMonthlyFrom">toMonthlyFrom</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#toWeeklyFrom">toWeeklyFrom</a></li><li><a href="global.html#toYearlyFrom">toYearlyFrom</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 10:24:48 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 16 2018 20:44:23 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

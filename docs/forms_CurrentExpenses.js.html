@@ -69,129 +69,402 @@ import { getUnder13Expenses } from '../utils/cashflow';
 // COMPONENTS
 // ========================================
 
-/** Renders a yes/no choice that will reveal the cash
- *     flow component given when the user selects 'yes'.
- *
- *     We added this extra step between the user and
- *     the input because people kept skipping that question.
- *
- * @param {object} props
- * @param {bool} props.hasExpenses True if client has any
- *     expenses here that could affect their income.
- * @param {object} props.CashFlowRow To be rendered if user
- *     chooses 'yes'.
- * @param {string | object} props.label To be rendered as
- *     the yes/no question.
- * @param {object} props.propData Data for the prop changed
- *     by the given cash flow component. (move component in
- *     here?)
- * @param {string} props.propData.childPropName Name of cash
- *     flow client prop to be updated.
- * @param {object} props.propData client Current or future
- *     client data.
- * @param {function} props.propData update Updates client
- *     values
- *
- * @returns Value that React can render
+/* Move these to SNAP calc logic scripts:
+ * @todo SNAP: Does a medical assistant's payments count as a medical expense?
+ *     (Answer: Yes. @see {@link https://www.mass.gov/service-details/snap-verifications})
+ * @todo SNAP: Medical expense only matters if household has elder/disabled, but
+ *     are they any medical expenses or only those of the disabled person? "Medical
+ *     Expenses for Disabled or Elderly". Also, do they sometimes need to
+ *     enter medical expenses even if they don't have an elderly or disabled
+ *     household member?
  */
-const EarnedFrom = function ({ hasExpenses, CashFlowRow, label, propData }) {
 
-  /** @todo Save amount temporarily when 'source'
-   *      amount is set to 0. */
-  var reset = function (evnt) {
-    var { childPropName, update } = propData;
+// `props` is a cloned version of the original props. References broken.
+/**
+  * @function
+  * @param {object} props
+  * @param {function} props.updateClientValue Setting client state
+  * @param {object} props.navData Buttons for bottom row
+  * @param {object} props.client Data for calculating benefits, `future` and `current`
+  * @param {object} props.snippets  Language-specific content
+  *
+  * @returns React element
+  */
+const CurrentExpensesStep = function ({ updateClientValue, navData, client, snippets }) {
 
-    update(evnt, {
-      name:  childPropName,
-      value: 0,
-    });
+  return (
+    &lt;FormPartsContainer
+      title     = { snippets.i_title }
+      clarifier = { snippets.i_clarifier }
+      navData   = { navData }
+      formClass = { `expenses` }>
+      &lt;ExpensesFormContent
+        updateClientValue = { updateClientValue }
+        current={ client.current }
+        time={ 'current' }
+        snippets={ snippets } />
+    &lt;/FormPartsContainer>
+  );
+
+};  // Ends CurrentExpensesStep()
+
+
+/** Abstracted for future use in 'future' value setting as well.
+ * @function
+ * @param {object} props
+ * @param {object} props.current Client data of current user circumstances
+ * @param {string} props.time 'current' or 'future'
+ * @param {function} props.updateClientValue Sets state values
+ * @param {object} props.snippets Language-specific content
+ *
+ * @returns React element
+ */
+const ExpensesFormContent = function ({ current, time, updateClientValue, snippets }) {
+
+  let type        = 'expense',
+      household   = current.household,
+      sharedProps = {
+        timeState:         current,
+        type:              type,
+        time:              time,
+        updateClientValue: updateClientValue,
+      };
+
+  /* @todo Make a more general age-checking function to keep
+   * household data format under control in one place. */
+  const isOver12 = function (member) {
+    return !isUnder13(member);
   };
 
-  if (hasExpenses) {
+  // Won't include head or spouse
+  const allDependents = getDependentMembers(household),
+        under13       = getEveryMember(allDependents, isUnder13),
+        over12        = getEveryMember(allDependents, isOver12);
 
-    var { childPropName, client } = propData;
-    var showProps = {
-      childName:           childPropName,
-      showChildrenAtStart: client[ childPropName ] > 0,
-      question:            label,
-      heading:             null,
-      onNo:                reset,
-      // `&lt;Surrounder>` props
-      Left:                &lt;AttentionArrow />,
-    };
+  // 'Elderly' here is using the lowest common denominator - SNAP standards.
+  const isElderlyOrDisabled = function (member) {
+    return isDisabled(member) || member.m_age >= 60;
+  };
+  const elderlyOrDisabled = getEveryMember(household, isElderlyOrDisabled),
+        elderlyOrDisabledHeadOrSpouse = getEveryMember(elderlyOrDisabled, isHeadOrSpouse);
 
-    return (
-      &lt;div className= { 'earned-from' }>
-        &lt;ShowOnYes { ...showProps }>
-          { CashFlowRow }
+  return (
+    &lt;div className='field-aligner two-column'>
+
+      { under13.length > 0 ? (
+        &lt;Under13
+          snippets          = { snippets }
+          type              = { type }
+          sharedProps       = { sharedProps }
+          current           = { current }
+          updateClientValue = { updateClientValue } />
+      ) : (
+        null
+      ) }
+
+      { current.benefits.includes('snap') ? (
+        &lt;ChildSupport
+          snippets    = { snippets }
+          type        = { type }
+          sharedProps = { sharedProps } />
+      ) : (
+        null
+      ) }
+
+      {/* Head or spouse can't be a dependent, so they don't count. */}
+      { over12.length > 0 ? (
+        &lt;DependentsOver12
+          snippets    = { snippets }
+          type        = { type }
+          sharedProps = { sharedProps } />
+      ) : (
+        null
+      ) }
+
+      { elderlyOrDisabled.length > 0 ? (
+        &lt;ElderlyOrDisabledAssistance
+          snippets          = { snippets }
+          type              = { type }
+          sharedProps       = { sharedProps }
+          current           = { current }
+          updateClientValue = { updateClientValue } />
+      ) : (
+        null
+      ) }
+
+      {/* This comment may or may not belong here. Deeper discussion needed:
+        * These medical expenses count for Section 8 too if the disabled
+        *     person is the head or spouse. From Appendix B, item (D)
+        *     {@link http://www.tacinc.org/media/58886/S8MS%20Full%20Book.pdf} */}
+      { elderlyOrDisabledHeadOrSpouse.length > 0 || (current.benefits.includes('snap') &amp;&amp; elderlyOrDisabled.length > 0) ? (
+        &lt;UnreimbursedMedical
+          snippets    = { snippets }
+          type        = { type }
+          sharedProps = { sharedProps } />
+      ) : (
+        null
+      ) }
+
+      &lt;Housing
+        current={ current }
+        time={ time }
+        type={ type }
+        updateClientValue = { updateClientValue } />
+
+      {/* Premature feature temporarily hidden to avoid messy revert
+        &lt;ShowOnYes
+          clientPartial = { current }
+          propName = { `wantsToSeeOtherExpenses` }
+          updateClientValue = { updateClientValue }
+          question = { `Do you want to enter your other expenses so you can see if you need to make a different plan?` }
+          heading = { `Other Expenses` }>
+          &lt;ExpensesOther { ...sharedProps } />
         &lt;/ShowOnYes>
-      &lt;/div>
-    );
+      */}
+    &lt;/div>
+  );
 
-  } else {
-    return null;
-  }
-
-};  // End EarnedFrom
+};  // Ends &lt;ExpensesFormContent>
 
 
-const Utilities = function ({ current, type, time, updateClientValue }) {
-
-  let hasClimate     = current.climateControl,
-      hasElectricity = current.nonHeatElectricity,
-      hasPhone       = current.phone,
-      hasFuelAssist  = current.fuelAssistance;
-
-  let setChecked = function (evnt, inputProps) {
-    var obj = { ...inputProps, value: inputProps.checked };
-    updateClientValue(evnt, obj);
-  };  // End setChecked()
-
-  // For keyboard access (already does spacebar)
-  let onKeyDown = function (evnt) {
-    if (evnt.key === `Enter`) {
-      evnt.target.click();
-    }
-  };
-
-  // May want to change name to 'utilities' and value to what's 'name' now
-  // Will require more work in the change handler
+const Under13 = function ({ snippets, type, sharedProps, current, updateClientValue }) {
   return (
     &lt;div>
-      &lt;Header as='h4'>Which of these utilities do you pay for?&lt;/Header>
+      &lt;ContentH1 subheading = { snippets.unreimbursedNonMedicalChildCare.i_subheading }>
+        { snippets.unreimbursedNonMedicalChildCare.i_sectionHeading }
+      &lt;/ContentH1>
+      &lt;IntervalColumnHeadings type={ type } />
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'childDirectCare' }>
+        { snippets.unreimbursedNonMedicalChildCare.childDirectCare.i_label }
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'childBeforeAndAfterSchoolCare' }>
+        { snippets.unreimbursedNonMedicalChildCare.childBeforeAndAfterSchoolCare.i_label}
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'childTransportation' }>
+        { snippets.unreimbursedNonMedicalChildCare.childTransportation.i_label }
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'childOtherCare' }>
+        { snippets.unreimbursedNonMedicalChildCare.childOtherCare.i_label }
+      &lt;/CashFlowInputsRow>
 
-      &lt;Checkbox
-        name={ 'climateControl' }
-        label={ 'Heating or cooling (e.g. A/C during summer)' }
-        checked={ hasClimate }
-        onChange={ setChecked }
-        onKeyDown = { onKeyDown } />
-      &lt;br />
-      &lt;Checkbox
-        name={ 'nonHeatElectricity' }
-        label={ 'Electricity for non-heating purposes' }
-        checked={ hasElectricity }
-        onChange={ setChecked }
-        onKeyDown = { onKeyDown } />
-      &lt;br />
-      &lt;Checkbox
-        name={ 'phone' }
-        label={ 'Telephone service' }
-        checked={ hasPhone }
-        onChange={ setChecked }
-        onKeyDown = { onKeyDown } />
-      &lt;br />
-      &lt;br />
-      &lt;ControlledRadioYesNo
-        labelText = { 'Do you get Fuel Assistance?' }
-        checked   = { hasFuelAssist }
-        name      = { 'fuelAssistance' }
-        onChange  = { updateClientValue } />
+      &lt;EarnedFrom
+        hasExpenses = { getUnder13Expenses(current) !== 0 }
+        label    = { `If you didn't have that child care, would it change how much pay you can bring home?` }
+        propData = {{
+          client:        current,
+          childPropName: `earnedBecauseOfChildCare`,
+          update:        updateClientValue,
+        }}
+        CashFlowRow = {
+          &lt;CashFlowInputsRow
+            { ...sharedProps }
+            generic = { `earnedBecauseOfChildCare` }>
+            { `How much less would you make?` }
+          &lt;/CashFlowInputsRow>
+        } />
 
     &lt;/div>
-
   );
-};  // End Utilities(&lt;>)
+};  // Ends &lt;Under13>
+
+
+const ChildSupport = function ({ type, sharedProps }) {
+  return (
+    &lt;div>
+      &lt;ContentH1>Child Support&lt;/ContentH1>
+      &lt;IntervalColumnHeadings type={ type } />
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'childSupportPaidOut' }> &lt;strong>Legally obligated&lt;/strong> child support
+      &lt;/CashFlowInputsRow>
+    &lt;/div>
+  );
+};
+
+
+const DependentsOver12 = function ({ type, sharedProps }) {
+  return (
+    &lt;div>
+      &lt;ContentH1 subheading = { 'For the care of people who are older than 12, but are still dependents (those under 18 or disabled). Don\'t include amounts that are paid for by other benefit programs.\n' }>
+        Dependent Care of Persons Over 12 Years of Age
+      &lt;/ContentH1>
+      &lt;IntervalColumnHeadings type={ type } />
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'adultDirectCare' }> Direct care costs
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'adultTransportation' }> Transportation costs
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'adultOtherCare' }> Other care
+      &lt;/CashFlowInputsRow>
+    &lt;/div>
+  );
+};  // Ends &lt;DependentsOver12>
+
+
+const ElderlyOrDisabledAssistance = function ({ current, type, sharedProps, updateClientValue }) {
+  return (
+    &lt;div>
+      &lt;HeadingWithDetail>
+        &lt;ContentH1>Unreimbursed Disabled/Handicapped/Elderly Assistance&lt;/ContentH1>
+        &lt;div>
+          &lt;div>Unreimbursed expenses to cover care attendants and auxiliary apparatus for any family member who is elderly or is a person with disabilities. Auxiliary apparatus are items such as wheelchairs, ramps, adaptations to vehicles, or special equipment to enable a blind person to read or type, but only if these items are directly related to permitting the disabled person or other family member to work.&lt;/div>
+          &lt;div>Examples of eligible disability assistance expenses:&lt;/div>
+          &lt;ul>
+            &lt;li>The payments made on a motorized wheelchair for the 42 year old son of the head of household enable the son to leave the house and go to work each day on his own. Prior to the purchase of the motorized wheelchair, the son was unable to make the commute to work. These payments are an eligible disability assistance expense.&lt;/li>
+            &lt;li>Payments to a care attendant to stay with a disabled 16-year-old child allow the child’s mother to go to work every day. These payments are an eligible disability assistance allowance.&lt;/li>
+          &lt;/ul>
+        &lt;/div>
+      &lt;/HeadingWithDetail>
+      &lt;IntervalColumnHeadings type={ type } />
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic={ 'disabledAssistance' }> Disabled/Handicapped assistance
+      &lt;/CashFlowInputsRow>
+
+      &lt;EarnedFrom
+        hasExpenses = { current.disabledAssistance !== 0 }
+        label    = { `If you didn't have that assistance, would it change how much pay you can bring home?` }
+        propData = {{
+          client:        current,
+          childPropName: `earnedBecauseOfAdultCare`,
+          update:        updateClientValue,
+        }}
+        CashFlowRow = {
+          &lt;CashFlowInputsRow
+            { ...sharedProps }
+            generic = { `earnedBecauseOfAdultCare` }>
+            { `How much less would you make?` }
+          &lt;/CashFlowInputsRow>
+        } />
+    &lt;/div>
+  );
+};  // Ends &lt;ElderlyOrDisabledAssistance>
+
+
+const UnreimbursedMedical = function ({ type, sharedProps }) {
+  return (
+    &lt;div>
+      &lt;HeadingWithDetail>
+        &lt;ContentH1>Unreimbursed Medical Expenses&lt;/ContentH1>
+        &lt;div>
+          &lt;div>Do not repeat anything you already listed in the section above. Examples of allowable medical expenses:&lt;/div>
+          &lt;ul>
+            &lt;li>The orthodontist expenses for a child’s braces.&lt;/li>
+            &lt;li>Services of doctors and health care professionals.&lt;/li>
+            &lt;li>Services of health care facilities.&lt;/li>
+            &lt;li>Medical insurance premiums. &lt;/li>
+            &lt;li>Prescription/non-prescription medicines (prescribed by a physician).&lt;/li>
+            &lt;li>Transportation to treatment (cab fare, bus fare, mileage).&lt;/li>
+            &lt;li>Dental expenses, eyeglasses, hearing aids, batteries.&lt;/li>
+            &lt;li>Live-in or periodic medical assistance.&lt;/li>
+            &lt;li>Monthly payment on accumulated medical bills (regular monthly payments on a bill that was previously incurred).&lt;/li>
+          &lt;/ul>
+        &lt;/div>
+      &lt;/HeadingWithDetail>
+      &lt;IntervalColumnHeadings type={ type } />
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic='disabledMedical'> Disabled/Elderly medical expenses
+      &lt;/CashFlowInputsRow>
+      &lt;CashFlowInputsRow
+        { ...sharedProps }
+        generic='otherMedical'> Medical expenses of other members
+      &lt;/CashFlowInputsRow>
+    &lt;/div>
+  );
+};  // Ends &lt;UnreimbursedMedical>
+
+
+/**
+ * @function
+ * @param {object} props
+ * @param {object} props.current Client data of current user circumstances
+ * @param {string} props.type 'expense' or 'income', etc., for classes
+ * @param {string} props.time 'current' or 'future'
+ * @param {function} props.updateClientValue Sets state values
+ *
+ * @returns React element
+ */
+const Housing = function ({ current, type, time, updateClientValue }) {
+
+  /** @deprecated This is handled differently now */
+  let ensureRouteAndValue = function (evnt, inputProps) {
+    let obj = { ...inputProps, name: inputProps.name, value: inputProps.value, checked: null };
+    updateClientValue(evnt, obj);
+  };
+
+  let sharedProps = {
+    current:           current,
+    type:              type,
+    time:              time,
+    updateClientValue: ensureRouteAndValue,
+  };
+
+  return (
+    &lt;div>
+
+      &lt;ContentH1>Housing&lt;/ContentH1>
+
+      { current.housing === 'voucher' ? (
+        null
+      ) : (
+        &lt;div>
+          &lt;Header as='h4'>What is your housing situation?&lt;/Header>
+          &lt;HousingRadio
+            currentValue={ current.housing }
+            label={ 'Homeless' }
+            time={ time }
+            updateClientValue = { ensureRouteAndValue } />
+          &lt;HousingRadio
+            currentValue={ current.housing }
+            label={ 'Renter' }
+            time={ time }
+            updateClientValue = { ensureRouteAndValue } />
+          &lt;HousingRadio
+            currentValue={ current.housing }
+            label={ 'Homeowner' }
+            time={ time }
+            updateClientValue = { ensureRouteAndValue } />
+        &lt;/div>
+      ) }
+
+      &lt;HousingDetails { ...sharedProps } />
+
+    &lt;/div>
+  );
+
+};  // Ends &lt;Housing>
+
+
+const HousingRadio = function ({ currentValue, label, time, updateClientValue }) {
+
+  const value = label.toLowerCase();
+
+  return (
+    &lt;Form.Field>
+      &lt;Radio
+        name={ 'housing' }
+        label={ label }
+        value={ value }
+        checked={ currentValue === value }
+        onChange = { updateClientValue } />
+    &lt;/Form.Field>
+  );
+
+};  // Ends &lt;HousingRadio>
 
 
 const HousingDetails = function ({ current, type, time, updateClientValue }) {
@@ -246,355 +519,149 @@ const HousingDetails = function ({ current, type, time, updateClientValue }) {
       &lt;/div>
     );
 
-  }  // end which expenses
-};  // End HousingDetails(&lt;>)
+  }  // ends which expenses
+};  // Ends &lt;HousingDetails>
 
 
-const HousingRadio = function ({ currentValue, label, time, updateClientValue }) {
+const Utilities = function ({ current, type, time, updateClientValue }) {
 
-  var value = label.toLowerCase();
+  let hasClimate     = current.climateControl,
+      hasElectricity = current.nonHeatElectricity,
+      hasPhone       = current.phone,
+      hasFuelAssist  = current.fuelAssistance;
 
-  return (
-    &lt;Form.Field>
-      &lt;Radio
-        name={ 'housing' }
-        label={ label }
-        value={ value }
-        checked={ currentValue === value }
-        onChange = { updateClientValue } />
-    &lt;/Form.Field>
-  );
-
-};  // End HousingRadio(&lt;>)
-
-
-/**
- * @function
- * @param {object} props
- * @param {object} props.current Client data of current user circumstances
- * @param {string} props.type 'expense' or 'income', etc., for classes
- * @param {string} props.time 'current' or 'future'
- * @param {function} props.updateClientValue Sets state values
- *
- * @returns React element
- */
-const Housing = function ({ current, type, time, updateClientValue }) {
-
-  /** @deprecated This is handled differently now */
-  let ensureRouteAndValue = function (evnt, inputProps) {
-    var obj = { ...inputProps, name: inputProps.name, value: inputProps.value, checked: null };
+  let setChecked = function (evnt, inputProps) {
+    const obj = { ...inputProps, value: inputProps.checked };
     updateClientValue(evnt, obj);
   };
 
-  let sharedProps = {
-    current:           current,
-    type:              type,
-    time:              time,
-    updateClientValue: ensureRouteAndValue,
+  // For keyboard access (already does spacebar)
+  let onKeyDown = function (evnt) {
+    if (evnt.key === `Enter`) {
+      evnt.target.click();
+    }
   };
 
+  // May want to change name to 'utilities' and value to what's 'name' now
+  // Will require more work in the change handler
   return (
     &lt;div>
+      &lt;Header as='h4'>Which of these utilities do you pay for?&lt;/Header>
 
-      &lt;ContentH1>Housing&lt;/ContentH1>
-
-      { current.housing === 'voucher' ? (
-        null
-      ) : (
-        &lt;div>
-          &lt;Header as='h4'>What is your housing situation?&lt;/Header>
-          &lt;HousingRadio
-            currentValue={ current.housing }
-            label={ 'Homeless' }
-            time={ time }
-            updateClientValue = { ensureRouteAndValue } />
-          &lt;HousingRadio
-            currentValue={ current.housing }
-            label={ 'Renter' }
-            time={ time }
-            updateClientValue = { ensureRouteAndValue } />
-          &lt;HousingRadio
-            currentValue={ current.housing }
-            label={ 'Homeowner' }
-            time={ time }
-            updateClientValue = { ensureRouteAndValue } />
-        &lt;/div>
-      ) }
-
-      &lt;HousingDetails { ...sharedProps } />
+      &lt;Checkbox
+        name={ 'climateControl' }
+        label={ 'Heating or cooling (e.g. A/C during summer)' }
+        checked={ hasClimate }
+        onChange={ setChecked }
+        onKeyDown = { onKeyDown } />
+      &lt;br />
+      &lt;Checkbox
+        name={ 'nonHeatElectricity' }
+        label={ 'Electricity for non-heating purposes' }
+        checked={ hasElectricity }
+        onChange={ setChecked }
+        onKeyDown = { onKeyDown } />
+      &lt;br />
+      &lt;Checkbox
+        name={ 'phone' }
+        label={ 'Telephone service' }
+        checked={ hasPhone }
+        onChange={ setChecked }
+        onKeyDown = { onKeyDown } />
+      &lt;br />
+      &lt;br />
+      &lt;ControlledRadioYesNo
+        labelText = { 'Do you get Fuel Assistance?' }
+        checked   = { hasFuelAssist }
+        name      = { 'fuelAssistance' }
+        onChange  = { updateClientValue } />
 
     &lt;/div>
+
   );
+};  // Ends &lt;Utilities>
 
-};  // End Housing()
 
-
-/** Abstracted for future use in 'future' value setting as well.
- * @function
- * @param {object} props
- * @param {object} props.current Client data of current user circumstances
- * @param {string} props.time 'current' or 'future'
- * @param {function} props.updateClientValue Sets state values
- * @param {object} props.snippets Language-specific content
+/** Renders a yes/no choice that will reveal the cash
+ *     flow component given when the user selects 'yes'.
  *
- * @returns React element
+ *     We added this extra step between the user and
+ *     the input because people kept skipping that question.
+ *
+ * @param {object} props
+ * @param {bool} props.hasExpenses True if client has any
+ *     expenses here that could affect their income.
+ * @param {object} props.CashFlowRow To be rendered if user
+ *     chooses 'yes'.
+ * @param {string | object} props.label To be rendered as
+ *     the yes/no question.
+ * @param {object} props.propData Data for the prop changed
+ *     by the given cash flow component. (move component in
+ *     here?)
+ * @param {string} props.propData.childPropName Name of cash
+ *     flow client prop to be updated.
+ * @param {object} props.propData client Current or future
+ *     client data.
+ * @param {function} props.propData update Updates client
+ *     values
+ *
+ * @returns Value that React can render
  */
-const ExpensesFormContent = function ({ current, time, updateClientValue, snippets }) {
+const EarnedFrom = function ({ hasExpenses, CashFlowRow, label, propData }) {
 
-  let type        = 'expense',
-      household   = current.household,
-      sharedProps = {
-        timeState:         current,
-        type:              type,
-        time:              time,
-        updateClientValue: updateClientValue,
-      };
+  /** @todo Save amount temporarily when 'source'
+   *      amount is set to 0. */
+  const reset = function (evnt) {
+    const { childPropName, update } = propData;
 
-  /* @todo Make a more general age-checking function to keep
-   * household data format under control in one place. */
-  var isOver12 = function (member) {
-    return !isUnder13(member);
+    update(evnt, {
+      name:  childPropName,
+      value: 0,
+    });
   };
 
-  // Won't include head or spouse
-  var allDependents = getDependentMembers(household),
-      under13       = getEveryMember(allDependents, isUnder13),
-      over12        = getEveryMember(allDependents, isOver12);
+  if (hasExpenses) {
 
-  // 'Elderly' here is using the lowest common denominator - SNAP standards.
-  var isElderlyOrDisabled = function (member) {
-    return isDisabled(member) || member.m_age >= 60;
-  };
-  var elderlyOrDisabled = getEveryMember(household, isElderlyOrDisabled),
-      elderlyOrDisabledHeadOrSpouse = getEveryMember(elderlyOrDisabled, isHeadOrSpouse);
+    const { childPropName, client } = propData;
+    const showProps = {
+      childName:           childPropName,
+      showChildrenAtStart: client[ childPropName ] > 0,
+      question:            label,
+      heading:             null,
+      onNo:                reset,
+      // `&lt;Surrounder>` props
+      Left:                &lt;AttentionArrow />,
+    };
 
-  return (
-    &lt;div className='field-aligner two-column'>
-
-      { under13.length > 0 ? (
-        &lt;div>
-          &lt;ContentH1 subheading = { snippets.unreimbursedNonMedicalChildCare.i_subheading }>
-            { snippets.unreimbursedNonMedicalChildCare.i_sectionHeading }
-          &lt;/ContentH1>
-          &lt;IntervalColumnHeadings type={ type } />
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'childDirectCare' }>
-            { snippets.unreimbursedNonMedicalChildCare.childDirectCare.i_label }
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'childBeforeAndAfterSchoolCare' }>
-            { snippets.unreimbursedNonMedicalChildCare.childBeforeAndAfterSchoolCare.i_label}
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'childTransportation' }>
-            { snippets.unreimbursedNonMedicalChildCare.childTransportation.i_label }
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'childOtherCare' }>
-            { snippets.unreimbursedNonMedicalChildCare.childOtherCare.i_label }
-          &lt;/CashFlowInputsRow>
-
-          &lt;EarnedFrom
-            hasExpenses = { getUnder13Expenses(current) !== 0 }
-            label    = { `If you didn't have that child care, would it change how much pay you can bring home?` }
-            propData = {{
-              client:        current,
-              childPropName: `earnedBecauseOfChildCare`,
-              update:        updateClientValue,
-            }}
-            CashFlowRow = {
-              &lt;CashFlowInputsRow
-                { ...sharedProps }
-                generic = { `earnedBecauseOfChildCare` }>
-                { `How much less would you make?` }
-              &lt;/CashFlowInputsRow>
-            } />
-
-        &lt;/div>
-      ) : (
-        null
-      ) }
-
-      { current.hasSnap ? (
-        &lt;div>
-          &lt;ContentH1>Child Support&lt;/ContentH1>
-          &lt;IntervalColumnHeadings type={ type } />
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'childSupportPaidOut' }> Child support &lt;strong>you&lt;/strong> pay
-          &lt;/CashFlowInputsRow>
-        &lt;/div>
-      ) : (
-        null
-      ) }
-
-      {/* Head or spouse can't be a dependent, so they don't count. */}
-      { over12.length > 0 ? (
-        &lt;div>
-          &lt;ContentH1 subheading = { 'For the care of people who are older than 12, but are still dependents (those under 18 or disabled). Don\'t include amounts that are paid for by other benefit programs.\n' }>
-            Dependent Care of Persons Over 12 Years of Age
-          &lt;/ContentH1>
-          &lt;IntervalColumnHeadings type={ type } />
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'adultDirectCare' }> Direct care costs
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'adultTransportation' }> Transportation costs
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'adultOtherCare' }> Other care
-          &lt;/CashFlowInputsRow>
-        &lt;/div>
-      ) : (
-        null
-      ) }
-
-      { elderlyOrDisabled.length > 0 ? (
-        &lt;div>
-          &lt;HeadingWithDetail>
-            &lt;ContentH1>Unreimbursed Disabled/Handicapped/Elderly Assistance&lt;/ContentH1>
-            &lt;div>
-              &lt;div>Unreimbursed expenses to cover care attendants and auxiliary apparatus for any family member who is elderly or is a person with disabilities. Auxiliary apparatus are items such as wheelchairs, ramps, adaptations to vehicles, or special equipment to enable a blind person to read or type, but only if these items are directly related to permitting the disabled person or other family member to work.&lt;/div>
-              &lt;div>Examples of eligible disability assistance expenses:&lt;/div>
-              &lt;ul>
-                &lt;li>The payments made on a motorized wheelchair for the 42 year old son of the head of household enable the son to leave the house and go to work each day on his own. Prior to the purchase of the motorized wheelchair, the son was unable to make the commute to work. These payments are an eligible disability assistance expense.&lt;/li>
-                &lt;li>Payments to a care attendant to stay with a disabled 16-year-old child allow the child’s mother to go to work every day. These payments are an eligible disability assistance allowance.&lt;/li>
-              &lt;/ul>
-            &lt;/div>
-          &lt;/HeadingWithDetail>
-          &lt;IntervalColumnHeadings type={ type } />
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic={ 'disabledAssistance' }> Disabled/Handicapped assistance
-          &lt;/CashFlowInputsRow>
-
-          &lt;EarnedFrom
-            hasExpenses = { current.disabledAssistance !== 0 }
-            label    = { `If you didn't have that assistance, would it change how much pay you can bring home?` }
-            propData = {{
-              client:        current,
-              childPropName: `earnedBecauseOfAdultCare`,
-              update:        updateClientValue,
-            }}
-            CashFlowRow = {
-              &lt;CashFlowInputsRow
-                { ...sharedProps }
-                generic = { `earnedBecauseOfAdultCare` }>
-                { `How much less would you make?` }
-              &lt;/CashFlowInputsRow>
-            } />
-
-        &lt;/div>
-      ) : (
-        null
-      ) }
-
-      {/* This comment may or may not belong here. Deeper discussion needed:
-        * These medical expenses count for Section 8 too if the disabled
-        *     person is the head or spouse. From Appendix B, item (D)
-        *     {@link http://www.tacinc.org/media/58886/S8MS%20Full%20Book.pdf} */}
-      { elderlyOrDisabledHeadOrSpouse.length > 0 || (current.hasSnap &amp;&amp; elderlyOrDisabled.length > 0) ? (
-        &lt;div>
-          &lt;HeadingWithDetail>
-            &lt;ContentH1>Unreimbursed Medical Expenses&lt;/ContentH1>
-            &lt;div>
-              &lt;div>Do not repeat anything you already listed in the section above. Examples of allowable medical expenses:&lt;/div>
-              &lt;ul>
-                &lt;li>The orthodontist expenses for a child’s braces.&lt;/li>
-                &lt;li>Services of doctors and health care professionals.&lt;/li>
-                &lt;li>Services of health care facilities.&lt;/li>
-                &lt;li>Medical insurance premiums. &lt;/li>
-                &lt;li>Prescription/non-prescription medicines (prescribed by a physician).&lt;/li>
-                &lt;li>Transportation to treatment (cab fare, bus fare, mileage).&lt;/li>
-                &lt;li>Dental expenses, eyeglasses, hearing aids, batteries.&lt;/li>
-                &lt;li>Live-in or periodic medical assistance.&lt;/li>
-                &lt;li>Monthly payment on accumulated medical bills (regular monthly payments on a bill that was previously incurred).&lt;/li>
-              &lt;/ul>
-            &lt;/div>
-          &lt;/HeadingWithDetail>
-          &lt;IntervalColumnHeadings type={ type } />
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic='disabledMedical'> Disabled/Elderly medical expenses
-          &lt;/CashFlowInputsRow>
-          &lt;CashFlowInputsRow
-            { ...sharedProps }
-            generic='otherMedical'> Medical expenses of other members
-          &lt;/CashFlowInputsRow>
-        &lt;/div>
-      ) : (
-        null
-      ) }
-
-      &lt;Housing
-        current={ current }
-        time={ time }
-        type={ type }
-        updateClientValue = { updateClientValue } />
-
-      {/* Premature feature temporarily hidden to avoid messy revert
-        &lt;ShowOnYes
-          clientPartial = { current }
-          propName = { `wantsToSeeOtherExpenses` }
-          updateClientValue = { updateClientValue }
-          question = { `Do you want to enter your other expenses so you can see if you need to make a different plan?` }
-          heading = { `Other Expenses` }>
-          &lt;ExpensesOther { ...sharedProps } />
+    return (
+      &lt;div className= { 'earned-from' }>
+        &lt;ShowOnYes { ...showProps }>
+          { CashFlowRow }
         &lt;/ShowOnYes>
-      */}
-    &lt;/div>
-  );
+      &lt;/div>
+    );
 
-};  // End ExpensesFormContent()
+  } else {
+    return null;
+  }
 
-/* Move these to SNAP calc logic scripts:
- * @todo SNAP: Does a medical assistant's payments count as a medical expense?
- *     (Answer: Yes. @see {@link https://www.mass.gov/service-details/snap-verifications})
- * @todo SNAP: Medical expense only matters if household has elder/disabled, but
- *     are they any medical expenses or only those of the disabled person? "Medical
- *     Expenses for Disabled or Elderly". Also, do they sometimes need to
- *     enter medical expenses even if they don't have an elderly or disabled
- *     household member?
- */
-
-// `props` is a cloned version of the original props. References broken.
-/**
-  * @function
-  * @param {object} props
-  * @param {function} props.updateClientValue Setting client state
-  * @param {object} props.navData Buttons for bottom row
-  * @param {object} props.client Data for calculating benefits, `future` and `current`
-  * @param {object} props.snippets  Language-specific content
-  *
-  * @returns React element
-  */
-const CurrentExpensesStep = function ({ updateClientValue, navData, client, snippets }) {
-
-  return (
-    &lt;FormPartsContainer
-      title     = { snippets.i_title }
-      clarifier = { snippets.i_clarifier }
-      navData   = { navData }
-      formClass = { `expenses` }>
-      &lt;ExpensesFormContent
-        updateClientValue = { updateClientValue }
-        current={ client.current }
-        time={ 'current' }
-        snippets={ snippets } />
-    &lt;/FormPartsContainer>
-  );
-
-};  // End CurrentExpensesStep()
+};  // Ends &lt;EarnedFrom>
 
 
-export { CurrentExpensesStep };
+export {
+  CurrentExpensesStep,
+  ExpensesFormContent,
+  Under13,
+  ChildSupport,
+  DependentsOver12,
+  ElderlyOrDisabledAssistance,
+  UnreimbursedMedical,
+  Housing,
+  HousingRadio,
+  HousingDetails,
+  Utilities,
+  EarnedFrom,
+};
 </code></pre>
         </article>
     </section>
@@ -605,13 +672,13 @@ export { CurrentExpensesStep };
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_cashflow.html">utils/cashflow</a></li><li><a href="module-utils_convert-by-timescale.html">utils/convert-by-timescale</a></li><li><a href="module-utils_getGovData.html">utils/getGovData</a></li><li><a href="module-utils_getMembers.html">utils/getMembers</a></li><li><a href="module-utils_getSideEffects.html">utils/getSideEffects</a></li><li><a href="module-utils_getTextForLanguage.html">utils/getTextForLanguage</a></li><li><a href="module-utils_getTimeFrames.html">utils/getTimeFrames</a></li><li><a href="module-utils_interpolation.html">utils/interpolation</a></li><li><a href="module-utils_math.html">utils/math</a></li><li><a href="module-utils_objectKeyPaths.html">utils/objectKeyPaths</a></li><li><a href="module-utils_setNestedProperty.html">utils/setNestedProperty</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowContainer">CashFlowContainer</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#localizations">localizations</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_charts_chartFormatting.html">utils/charts/chartFormatting</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BenefitsLinesComp.html">BenefitsLinesComp</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#applySideEffects">applySideEffects</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CashFlowRow">CashFlowRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#convertForUpdate">convertForUpdate</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#deepFreeze">deepFreeze</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#empty">empty</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getBenefitTimeFrames">getBenefitTimeFrames</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getDependentCostsMonthly">getDependentCostsMonthly</a></li><li><a href="global.html#getEveryMember">getEveryMember</a></li><li><a href="global.html#getEveryMemberOfHousehold">getEveryMemberOfHousehold</a></li><li><a href="global.html#getExtraAmount">getExtraAmount</a></li><li><a href="global.html#getGrossUnearnedIncomeMonthly">getGrossUnearnedIncomeMonthly</a></li><li><a href="global.html#getKeyPathsArray">getKeyPathsArray</a></li><li><a href="global.html#getKeyPathStrings">getKeyPathStrings</a></li><li><a href="global.html#getLimitBySize">getLimitBySize</a></li><li><a href="global.html#getLocalizationData">getLocalizationData</a></li><li><a href="global.html#getMaxIntKey">getMaxIntKey</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSimpleGrossIncomeMonthly">getSimpleGrossIncomeMonthly</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#getTextForLanguage">getTextForLanguage</a></li><li><a href="global.html#getUnder13Expenses">getUnder13Expenses</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#interpolateSnippets">interpolateSnippets</a></li><li><a href="global.html#interpolateText">interpolateText</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#isDependent">isDependent</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#mergeCustomizer">mergeCustomizer</a></li><li><a href="global.html#moneyToWholeNum">moneyToWholeNum</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#Recursionisuntested.">Recursion is untested.</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#sum">sum</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#sumProps">sumProps</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#toMonthlyFrom">toMonthlyFrom</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#toWeeklyFrom">toWeeklyFrom</a></li><li><a href="global.html#toYearlyFrom">toYearlyFrom</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 10:24:48 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 16 2018 20:44:23 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

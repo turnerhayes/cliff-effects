@@ -57,7 +57,7 @@ import {
  * 
  * @namespace
  */
-var SNAPhelpers = {},
+let SNAPhelpers = {},
     hlp         = SNAPhelpers;
 
 
@@ -66,9 +66,9 @@ var SNAPhelpers = {},
  *     changes in earned income */
 const getSNAPBenefits = function (fullClient, timeframe) {
 
-  var client = fullClient[ timeframe ];
+  let client = fullClient[ timeframe ];
 
-  var finalResult = 0,
+  let finalResult = 0,
       householdSize           = hlp.getHouseholdSize(client),
       grossIncomeTestResult   = hlp.passesGrossIncomeTest(client),
       netIncomeTestResult     = hlp.passesNetIncomeTest(client),
@@ -111,7 +111,7 @@ const getSNAPBenefits = function (fullClient, timeframe) {
  * @returns {boolean}
  */
 hlp.passesGrossIncomeTest = function (client) {
-  var adjustedGross    = hlp.getAdjustedGross(client),
+  let adjustedGross    = hlp.getAdjustedGross(client),
       grossIncomeLimit = hlp.getGrossIncomeLimit(client),
       passes           = null;
 
@@ -142,7 +142,7 @@ hlp.passesGrossIncomeTest = function (client) {
  * @returns {boolean}
  */
 hlp.passesNetIncomeTest = function(client) {
-  var maxNetIncome = hlp.getMaxNetIncome(client);
+  let maxNetIncome = hlp.getMaxNetIncome(client);
 
   if (maxNetIncome === `no limit`) {
     return true;
@@ -162,7 +162,7 @@ hlp.passesNetIncomeTest = function(client) {
  */
 hlp.getMaxNetIncome = function (client) {
   // @todo Logic different in website calculator vs. excel sheet for this logic
-  var adjustedGross           = hlp.getAdjustedGross(client),
+  let adjustedGross           = hlp.getAdjustedGross(client),
       grossIncomeLimit        = hlp.getGrossIncomeLimit(client),
       disabledOrElderlyMember = hlp.hasDisabledOrElderlyMember(client);
   
@@ -182,11 +182,11 @@ hlp.getMaxNetIncome = function (client) {
  * @returns {number}
  */
 hlp.getNetIncome = function(client) {
-  var adjustedIncome    = hlp.getAdjustedGrossMinusDeductions(client),
+  let adjustedIncome    = hlp.getAdjustedGrossMinusDeductions(client),
       // These two functions make unit testing much easier
       homelessDeduction = hlp.getHomelessDeduction(client),
       shelterDeduction  = hlp.getShelterDeduction(client);
-  var extraDeductions   = homelessDeduction + shelterDeduction,
+  let extraDeductions   = homelessDeduction + shelterDeduction,
       afterDeductions   = adjustedIncome - extraDeductions;
 
   return Math.max(0, afterDeductions);
@@ -201,13 +201,13 @@ hlp.getNetIncome = function(client) {
  * @returns {number}
  */
 hlp.getAdjustedGrossMinusDeductions = function (client) {
-  var adjustedGross           = hlp.getAdjustedGross(client),
+  let adjustedGross           = hlp.getAdjustedGross(client),
       standardDeduction       = hlp.getStandardDeduction(client),
       earnedIncomeDeduction   = hlp.getEarnedIncomeDeduction(client),
       medicalDeduction        = hlp.getMedicalDeduction(client),
       dependentCareDeduction  = hlp.getDependentCareDeduction(client);
 
-  var adjustedIncome = adjustedGross - standardDeduction - earnedIncomeDeduction - medicalDeduction - dependentCareDeduction;
+  let adjustedIncome = adjustedGross - standardDeduction - earnedIncomeDeduction - medicalDeduction - dependentCareDeduction;
   return Math.max(0, adjustedIncome);
 };
 
@@ -232,7 +232,7 @@ hlp.getStandardDeduction = function (client) {
  * @returns {number}
  */
 hlp.getEarnedIncomeDeduction = function (client) {
-  var totalMonthlyEarned = client.earned;
+  let totalMonthlyEarned = client.earned;
   return totalMonthlyEarned * SNAPData.PERCENT_GROSS_MONTHLY_EARNED;
 };
 
@@ -243,11 +243,11 @@ hlp.getEarnedIncomeDeduction = function (client) {
  * @returns {number}
  */
 hlp.getMedicalDeduction = function (client) {
-  var medicalDeduce = 0;
+  let medicalDeduce = 0;
 
   if (hlp.hasDisabledOrElderlyMember(client) === true) {
     /** @todo Add disabledAssistance too. Also, otherMedical? */
-    var medicalExpenses = client.disabledMedical;
+    let medicalExpenses = client.disabledMedical;
     if ((medicalExpenses >= SNAPData.MIN_MEDICAL_EXPENSES) &amp;&amp; (medicalExpenses &lt;= SNAPData.MAX_MEDICAL_EXPENSES)) {
       medicalDeduce = SNAPData.STANDARD_MEDICAL_DEDUCTION;
 
@@ -268,7 +268,7 @@ hlp.getMedicalDeduction = function (client) {
  */
 hlp.getDependentCareDeduction = function (client) {
 
-  var dependentCare = 0;
+  let dependentCare = 0;
 
   /** @todo Adopt https://github.com/codeforboston/cliff-effects/issues/264
    *     model for all these 'kinds' of 'if' situations. If possible. */
@@ -276,7 +276,7 @@ hlp.getDependentCareDeduction = function (client) {
     dependentCare += sumProps(client, UNDER13_CARE_EXPENSES);
   }
 
-  var membersOver12    = getOlderThan(client, 12),
+  let membersOver12    = getOlderThan(client, 12),
       dependentsOver12 = getDependentMembers(membersOver12);
   /** May want to test this the same way as Expenses step does. More consistent? */
   if (dependentsOver12.length > 0) {
@@ -314,7 +314,7 @@ hlp.getHomelessDeduction = function(client) {
  */
 hlp.getShelterDeduction = function(client) {
 
-  var rawDeduction = hlp.getRawHousingDeduction(client);
+  let rawDeduction = hlp.getRawHousingDeduction(client);
 
   if (hlp.hasDisabledOrElderlyMember(client)) {
     return rawDeduction;
@@ -333,7 +333,7 @@ hlp.getShelterDeduction = function(client) {
  * @returns {number}
  */
 hlp.getRawHousingDeduction = function(client) {
-  var housingCosts        = hlp.getNonUtilityHousingCosts(client),
+  let housingCosts        = hlp.getNonUtilityHousingCosts(client),
       utilityCosts        = hlp.getUtilityCostByBracket(client),
       totalHousingCost    = housingCosts + utilityCosts,
       halfAdjustedIncome  = hlp.getAdjustedGrossMinusDeductions(client) * 0.50,
@@ -352,7 +352,7 @@ hlp.getRawHousingDeduction = function(client) {
  * @returns {number}
  */
 hlp.getNonUtilityHousingCosts = function(client) {
-  var housingCost = null;
+  let housingCost = null;
 
   if (hlp.isHomeless(client)) {
     housingCost = 0;
@@ -380,7 +380,7 @@ hlp.getUtilityCostByBracket = function (client) {
 
   } else {
     
-    var utilityCategory = null;
+    let utilityCategory = null;
 
     if (client.climateControl || client.fuelAssistance) {
       utilityCategory = 'Heating';
@@ -408,7 +408,7 @@ hlp.getUtilityCostByBracket = function (client) {
  * @returns {number}
  */
 hlp.getAdjustedGross = function (client) {
-  var raw = client.earned + getGrossUnearnedIncomeMonthly(client) - client.childSupportPaidOut;
+  let raw = client.earned + getGrossUnearnedIncomeMonthly(client) - client.childSupportPaidOut;
   return Math.max(0, raw);
 };
 
@@ -419,7 +419,7 @@ hlp.getAdjustedGross = function (client) {
  * @returns {number}
  */
 hlp.getGrossIncomeLimit = function (client) {
-  var data      = federalPovertyGuidelines,
+  let data      = federalPovertyGuidelines,
       numPeople = hlp.getHouseholdSize(client),
       // Data is given in yearly amounts
       limit     = getLimitBySize(data, numPeople, 200),
@@ -493,13 +493,13 @@ export { getSNAPBenefits, SNAPhelpers };
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_cashflow.html">utils/cashflow</a></li><li><a href="module-utils_convert-by-timescale.html">utils/convert-by-timescale</a></li><li><a href="module-utils_getGovData.html">utils/getGovData</a></li><li><a href="module-utils_getMembers.html">utils/getMembers</a></li><li><a href="module-utils_getSideEffects.html">utils/getSideEffects</a></li><li><a href="module-utils_getTextForLanguage.html">utils/getTextForLanguage</a></li><li><a href="module-utils_getTimeFrames.html">utils/getTimeFrames</a></li><li><a href="module-utils_interpolation.html">utils/interpolation</a></li><li><a href="module-utils_math.html">utils/math</a></li><li><a href="module-utils_objectKeyPaths.html">utils/objectKeyPaths</a></li><li><a href="module-utils_setNestedProperty.html">utils/setNestedProperty</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowContainer">CashFlowContainer</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#localizations">localizations</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-formHelpers.html">formHelpers</a></li><li><a href="module-utils_charts_chartFormatting.html">utils/charts/chartFormatting</a></li><li><a href="module-utils_validators.html">utils/validators</a></li><li><a href="module-utils_valueFixers.html">utils/valueFixers</a></li></ul><h3>Classes</h3><ul><li><a href="App.html">App</a></li><li><a href="AskPermission.html">AskPermission</a></li><li><a href="BenefitsLinesComp.html">BenefitsLinesComp</a></li><li><a href="BrowserLeaveListener.html">BrowserLeaveListener</a></li><li><a href="CashFlowInputsRow.html">CashFlowInputsRow</a></li><li><a href="Confirmer.html">Confirmer</a></li><li><a href="ControlledRadioYesNo.html">ControlledRadioYesNo</a></li><li><a href="CustomClient.html">CustomClient</a></li><li><a href="ErrorListener.html">ErrorListener</a></li><li><a href="FeedbackPrompt.html">FeedbackPrompt</a></li><li><a href="HeadingWithDetail.html">HeadingWithDetail</a></li><li><a href="ManagedNumberField.html">ManagedNumberField</a></li><li><a href="ReactRouterLeaveListener.html">ReactRouterLeaveListener</a></li><li><a href="RowWithDetail.html">RowWithDetail</a></li><li><a href="ShowOnYes.html">ShowOnYes</a></li><li><a href="TermsAndConditions.html">TermsAndConditions</a></li><li><a href="VerticalLine.html">VerticalLine</a></li></ul><h3>Namespaces</h3><ul><li><a href="SNAPhelpers.html">SNAPhelpers</a></li></ul><h3>Global</h3><ul><li><a href="global.html#applyAndPushBenefits">applyAndPushBenefits</a></li><li><a href="global.html#applySideEffects">applySideEffects</a></li><li><a href="global.html#BottomRowButton">BottomRowButton</a></li><li><a href="global.html#CashFlowDisplayRow">CashFlowDisplayRow</a></li><li><a href="global.html#CashFlowRow">CashFlowRow</a></li><li><a href="global.html#CLIENT_DEFAULTS">CLIENT_DEFAULTS</a></li><li><a href="global.html#ColumnHeading">ColumnHeading</a></li><li><a href="global.html#ContentH1">ContentH1</a></li><li><a href="global.html#ContentSubH1">ContentSubH1</a></li><li><a href="global.html#convertForUpdate">convertForUpdate</a></li><li><a href="global.html#CurrentBenefitsContent">CurrentBenefitsContent</a></li><li><a href="global.html#CurrentBenefitsStep">CurrentBenefitsStep</a></li><li><a href="global.html#CurrentExpensesStep">CurrentExpensesStep</a></li><li><a href="global.html#CurrentIncomeStep">CurrentIncomeStep</a></li><li><a href="global.html#deepFreeze">deepFreeze</a></li><li><a href="global.html#DevMenu">DevMenu</a></li><li><a href="global.html#EarnedFrom">EarnedFrom</a></li><li><a href="global.html#empty">empty</a></li><li><a href="global.html#ExpensesFormContent">ExpensesFormContent</a></li><li><a href="global.html#ExternalLink">ExternalLink</a></li><li><a href="global.html#FormPartsContainer">FormPartsContainer</a></li><li><a href="global.html#getBenefitData">getBenefitData</a></li><li><a href="global.html#getBenefitTimeFrames">getBenefitTimeFrames</a></li><li><a href="global.html#getChartData">getChartData</a></li><li><a href="global.html#getDependentCostsMonthly">getDependentCostsMonthly</a></li><li><a href="global.html#getEveryMember">getEveryMember</a></li><li><a href="global.html#getEveryMemberOfHousehold">getEveryMemberOfHousehold</a></li><li><a href="global.html#getExtraAmount">getExtraAmount</a></li><li><a href="global.html#getGrossUnearnedIncomeMonthly">getGrossUnearnedIncomeMonthly</a></li><li><a href="global.html#getKeyPathsArray">getKeyPathsArray</a></li><li><a href="global.html#getKeyPathStrings">getKeyPathStrings</a></li><li><a href="global.html#getLimitBySize">getLimitBySize</a></li><li><a href="global.html#getLocalizationData">getLocalizationData</a></li><li><a href="global.html#getMaxIntKey">getMaxIntKey</a></li><li><a href="global.html#getSection8Benefit">getSection8Benefit</a></li><li><a href="global.html#getSimpleGrossIncomeMonthly">getSimpleGrossIncomeMonthly</a></li><li><a href="global.html#getSNAPBenefits">getSNAPBenefits</a></li><li><a href="global.html#getTextForLanguage">getTextForLanguage</a></li><li><a href="global.html#getUnder13Expenses">getUnder13Expenses</a></li><li><a href="global.html#Housing">Housing</a></li><li><a href="global.html#IncomeForm">IncomeForm</a></li><li><a href="global.html#inlineComponents">inlineComponents</a></li><li><a href="global.html#interpolateSnippets">interpolateSnippets</a></li><li><a href="global.html#interpolateText">interpolateText</a></li><li><a href="global.html#IntervalColumnHeadings">IntervalColumnHeadings</a></li><li><a href="global.html#isDependent">isDependent</a></li><li><a href="global.html#limit">limit</a></li><li><a href="global.html#maximum_value_yearly">maximum_value_yearly</a></li><li><a href="global.html#mergeCustomizer">mergeCustomizer</a></li><li><a href="global.html#moneyToWholeNum">moneyToWholeNum</a></li><li><a href="global.html#MonthlyCashFlowRow">MonthlyCashFlowRow</a></li><li><a href="global.html#Recursionisuntested.">Recursion is untested.</a></li><li><a href="global.html#round$">round$</a></li><li><a href="global.html#sampleClients">sampleClients</a></li><li><a href="global.html#SpaceHolder">SpaceHolder</a></li><li><a href="global.html#StackedBarGraph">StackedBarGraph</a></li><li><a href="global.html#sum">sum</a></li><li><a href="global.html#Summary">Summary</a></li><li><a href="global.html#sumProps">sumProps</a></li><li><a href="global.html#toMoneyStr">toMoneyStr</a></li><li><a href="global.html#toMonthlyFrom">toMonthlyFrom</a></li><li><a href="global.html#totalLastItemsOfArraysInObject">totalLastItemsOfArraysInObject</a></li><li><a href="global.html#toWeeklyFrom">toWeeklyFrom</a></li><li><a href="global.html#toYearlyFrom">toYearlyFrom</a></li><li><a href="global.html#undefinedString">undefinedString</a></li><li><a href="global.html#UNDER13_NON_TRANSPORT_CARE">UNDER13_NON_TRANSPORT_CARE</a></li><li><a href="global.html#UNEARNED_INCOME_SOURCES">UNEARNED_INCOME_SOURCES</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 19 2018 10:24:48 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 16 2018 20:44:23 GMT-0500 (Eastern Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
